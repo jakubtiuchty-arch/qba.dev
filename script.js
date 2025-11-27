@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initScrollAnimations();
     initContactForm();
     initTypingEffect();
+    initPortfolioModal();
 });
 
 /**
@@ -566,3 +567,209 @@ initFormEffects();
  */
 console.log('%c qba.dev ', 'background: linear-gradient(135deg, #6366f1, #a855f7); color: white; font-size: 24px; padding: 10px 20px; border-radius: 8px; font-weight: bold;');
 console.log('%c Szukasz developera? Napisz do mnie! hello@qba.dev ', 'color: #6366f1; font-size: 14px;');
+
+/**
+ * Portfolio Modal functionality
+ */
+function initPortfolioModal() {
+    const portfolioItems = document.querySelectorAll('.portfolio-item[data-modal]');
+    const modal = document.getElementById('portfolio-modal');
+    const modalContent = document.getElementById('modal-content');
+    const modalUrl = document.getElementById('modal-url');
+    const modalClose = document.getElementById('modal-close');
+    const modalBackdrop = document.querySelector('.modal-backdrop');
+
+    if (!modal || portfolioItems.length === 0) return;
+
+    // Modal content templates
+    const modalTemplates = {
+        techstore: {
+            url: 'www.techstore.pl',
+            content: `
+                <div class="modal-page modal-techstore">
+                    <nav class="page-nav">
+                        <div class="page-logo">Tech<span>Store</span></div>
+                        <div class="page-nav-links">
+                            <span>Produkty</span>
+                            <span>Promocje</span>
+                            <span>O nas</span>
+                            <span>Kontakt</span>
+                        </div>
+                    </nav>
+                    <div class="page-hero">
+                        <div class="page-hero-content">
+                            <span class="page-badge">Nowość 2025</span>
+                            <h1>Słuchawki<br><span>ProMax Ultra</span></h1>
+                            <p>Zanurz się w dźwięku przyszłości. Aktywna redukcja szumów, 40h pracy na baterii, dźwięk Hi-Res Audio.</p>
+                            <span class="page-btn">Kup teraz - 899 zł</span>
+                        </div>
+                        <div class="page-hero-image"></div>
+                    </div>
+                    <div class="page-features">
+                        <div class="feature-card">
+                            <h3>Darmowa dostawa</h3>
+                            <p>Przy zamówieniach powyżej 200 zł</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>30 dni na zwrot</h3>
+                            <p>Bez pytań, pełny zwrot kosztów</p>
+                        </div>
+                        <div class="feature-card">
+                            <h3>2 lata gwarancji</h3>
+                            <p>Rozszerzona gwarancja producenta</p>
+                        </div>
+                    </div>
+                </div>
+            `
+        },
+        lawfirm: {
+            url: 'www.kowalski-partnerzy.pl',
+            content: `
+                <div class="modal-page modal-lawfirm">
+                    <nav class="page-nav">
+                        <div class="page-logo">Kowalski <span>&</span> Partnerzy</div>
+                        <div class="page-nav-links">
+                            <span>O kancelarii</span>
+                            <span>Usługi</span>
+                            <span>Zespół</span>
+                            <span>Kontakt</span>
+                        </div>
+                    </nav>
+                    <div class="page-hero">
+                        <span class="page-small">Kancelaria Prawna</span>
+                        <h1>Prawo w służbie Twojego biznesu</h1>
+                        <p>Od 15 lat pomagamy przedsiębiorcom w budowaniu bezpiecznych fundamentów prawnych. Specjalizujemy się w prawie gospodarczym, korporacyjnym i podatkowym.</p>
+                        <span class="page-btn">Bezpłatna konsultacja</span>
+                    </div>
+                    <div class="page-services">
+                        <div class="service-card">
+                            <h3>Prawo gospodarcze</h3>
+                            <p>Kompleksowa obsługa prawna firm i przedsiębiorców</p>
+                        </div>
+                        <div class="service-card">
+                            <h3>Prawo korporacyjne</h3>
+                            <p>Zakładanie spółek, fuzje, przekształcenia</p>
+                        </div>
+                        <div class="service-card">
+                            <h3>Prawo podatkowe</h3>
+                            <p>Optymalizacja podatkowa i reprezentacja przed US</p>
+                        </div>
+                    </div>
+                </div>
+            `
+        },
+        fitness: {
+            url: 'www.fitpro-trener.pl',
+            content: `
+                <div class="modal-page modal-fitness">
+                    <nav class="page-nav">
+                        <div class="page-logo">FIT<span>Pro</span></div>
+                        <div class="page-nav-links">
+                            <span>O mnie</span>
+                            <span>Oferta</span>
+                            <span>Transformacje</span>
+                            <span>Cennik</span>
+                            <span>Kontakt</span>
+                        </div>
+                    </nav>
+                    <div class="page-hero">
+                        <h1>Trenuj z <span>najlepszymi</span></h1>
+                        <p>Personalny trening dopasowany do Twoich celów. Schudnij, zbuduj masę lub popraw kondycję.</p>
+                        <span class="page-btn">Umów darmowy trening</span>
+                    </div>
+                    <div class="page-stats">
+                        <div class="stat-card">
+                            <div class="number">500+</div>
+                            <div class="label">Zadowolonych klientów</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="number">8</div>
+                            <div class="label">Lat doświadczenia</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="number">15k+</div>
+                            <div class="label">Przeprowadzonych treningów</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="number">98%</div>
+                            <div class="label">Skuteczność</div>
+                        </div>
+                    </div>
+                </div>
+            `
+        },
+        restaurant: {
+            url: 'www.lacucina.pl',
+            content: `
+                <div class="modal-page modal-restaurant">
+                    <nav class="page-nav">
+                        <div class="page-logo">La <span>Cucina</span></div>
+                        <div class="page-nav-links">
+                            <span>Menu</span>
+                            <span>O nas</span>
+                            <span>Galeria</span>
+                            <span>Rezerwacja</span>
+                            <span>Kontakt</span>
+                        </div>
+                    </nav>
+                    <div class="page-hero">
+                        <span class="page-small">Ristorante Italiano</span>
+                        <h1>Smak Włoch w sercu miasta</h1>
+                        <p>Autentyczna kuchnia włoska przygotowywana z pasją według tradycyjnych receptur. Świeże składniki, domowy makaron, najlepsze wina.</p>
+                        <span class="page-btn">Rezerwuj stolik</span>
+                    </div>
+                    <div class="page-menu">
+                        <div class="menu-card">
+                            <h3>Antipasti</h3>
+                            <p>Bruschetta, Carpaccio, Burrata</p>
+                        </div>
+                        <div class="menu-card">
+                            <h3>Pasta & Risotto</h3>
+                            <p>Tagliatelle, Ravioli, Risotto ai funghi</p>
+                        </div>
+                        <div class="menu-card">
+                            <h3>Dolci</h3>
+                            <p>Tiramisu, Panna Cotta, Cannoli</p>
+                        </div>
+                    </div>
+                </div>
+            `
+        }
+    };
+
+    // Open modal
+    function openModal(modalId) {
+        const template = modalTemplates[modalId];
+        if (!template) return;
+
+        modalUrl.textContent = template.url;
+        modalContent.innerHTML = template.content;
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Close modal
+    function closeModal() {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // Event listeners for portfolio items
+    portfolioItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const modalId = item.getAttribute('data-modal');
+            openModal(modalId);
+        });
+    });
+
+    // Close modal events
+    modalClose.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', closeModal);
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+}
