@@ -1255,6 +1255,84 @@ section {
     background: var(--color-text-secondary);
 }
 
+/* Pricing Addons */
+.pricing-addons {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-border);
+}
+
+.addons-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px dashed var(--color-border);
+    border-radius: 10px;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.addons-toggle:hover {
+    border-color: var(--color-accent-1);
+    color: var(--color-accent-1);
+}
+
+.addons-toggle svg {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+}
+
+.addons-toggle.active svg {
+    transform: rotate(180deg);
+}
+
+.addons-list {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 15px;
+    background: var(--color-bg-tertiary);
+    border-radius: 10px;
+}
+
+.addons-list.active {
+    display: flex;
+}
+
+.addon-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.addon-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.addon-name {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+}
+
+.addon-price {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-success);
+}
+
 .pricing-note {
     text-align: center;
     color: var(--color-text-muted);

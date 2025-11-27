@@ -516,6 +516,31 @@ function initPricingEffects() {
 initPricingEffects();
 
 /**
+ * Pricing addons toggle
+ */
+function initPricingAddons() {
+    const toggles = document.querySelectorAll('.addons-toggle');
+
+    toggles.forEach(toggle => {
+        toggle.addEventListener('click', () => {
+            const addonsList = toggle.nextElementSibling;
+            toggle.classList.toggle('active');
+            addonsList.classList.toggle('active');
+
+            // Update button text
+            const span = toggle.querySelector('span');
+            if (toggle.classList.contains('active')) {
+                span.textContent = 'Ukryj dodatki';
+            } else {
+                span.textContent = 'Pokaż dodatki';
+            }
+        });
+    });
+}
+
+initPricingAddons();
+
+/**
  * Portfolio item hover effect
  */
 function initPortfolioEffects() {
