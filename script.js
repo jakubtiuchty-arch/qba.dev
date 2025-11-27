@@ -569,10 +569,30 @@ console.log('%c qba.dev ', 'background: linear-gradient(135deg, #6366f1, #a855f7
 console.log('%c Szukasz developera? Napisz do mnie! hello@qba.dev ', 'color: #6366f1; font-size: 14px;');
 
 /**
+ * Portfolio Showcase hover effect with mouse tracking
+ */
+function initShowcaseEffects() {
+    const showcaseItems = document.querySelectorAll('.showcase-item');
+
+    showcaseItems.forEach(item => {
+        item.addEventListener('mousemove', (e) => {
+            const rect = item.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            item.style.setProperty('--mouse-x', `${x}px`);
+            item.style.setProperty('--mouse-y', `${y}px`);
+        });
+    });
+}
+
+initShowcaseEffects();
+
+/**
  * Portfolio Modal functionality
  */
 function initPortfolioModal() {
-    const portfolioItems = document.querySelectorAll('.portfolio-item[data-modal]');
+    const portfolioItems = document.querySelectorAll('.showcase-item[data-modal]');
     const modal = document.getElementById('portfolio-modal');
     const modalContent = document.getElementById('modal-content');
     const modalUrl = document.getElementById('modal-url');
