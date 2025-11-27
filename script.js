@@ -516,23 +516,20 @@ function initPricingEffects() {
 initPricingEffects();
 
 /**
- * Pricing addons toggle
+ * Pricing addons toggle (iOS-style)
  */
 function initPricingAddons() {
-    const toggles = document.querySelectorAll('.addons-toggle');
+    const checkboxes = document.querySelectorAll('.addons-checkbox');
 
-    toggles.forEach(toggle => {
-        toggle.addEventListener('click', () => {
-            const addonsList = toggle.nextElementSibling;
-            toggle.classList.toggle('active');
-            addonsList.classList.toggle('active');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            const wrapper = checkbox.closest('.addons-toggle-wrapper');
+            const addonsList = wrapper.nextElementSibling;
 
-            // Update button text
-            const span = toggle.querySelector('span');
-            if (toggle.classList.contains('active')) {
-                span.textContent = 'Ukryj dodatki';
+            if (checkbox.checked) {
+                addonsList.classList.add('active');
             } else {
-                span.textContent = 'Pokaż dodatki';
+                addonsList.classList.remove('active');
             }
         });
     });
