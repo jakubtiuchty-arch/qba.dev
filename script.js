@@ -191,7 +191,7 @@ function initCounterAnimation() {
  */
 function initScrollAnimations() {
     const animatedElements = document.querySelectorAll(
-        '.service-card, .process-step, .portfolio-item, .pricing-card, .testimonial-card, .problem-item'
+        '.service-card, .process-step, .showcase-item, .pricing-card, .tech-category, .problem-item'
     );
 
     if (animatedElements.length === 0) return;
