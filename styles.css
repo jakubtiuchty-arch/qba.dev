@@ -1257,9 +1257,9 @@ section {
 
 /* Pricing Addons */
 .pricing-addons {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 1px solid var(--color-border);
+    margin-top: auto;
+    padding-top: 24px;
+    margin-bottom: 20px;
 }
 
 /* iOS-style Toggle Switch */
@@ -1267,21 +1267,39 @@ section {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
-    background: var(--color-bg-tertiary);
-    border-radius: 12px;
+    padding: 14px 18px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
     cursor: pointer;
     transition: var(--transition-fast);
 }
 
 .addons-toggle-wrapper:hover {
-    background: rgba(99, 102, 241, 0.1);
+    background: rgba(0, 0, 0, 0.4);
+    border-color: var(--color-accent-1);
+}
+
+/* Featured card toggle - better contrast */
+.pricing-card-featured .addons-toggle-wrapper {
+    background: rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pricing-card-featured .addons-toggle-wrapper:hover {
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.pricing-card-featured .addons-label {
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .addons-label {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--color-text-secondary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    letter-spacing: 0.02em;
 }
 
 .addons-checkbox {
@@ -1334,12 +1352,30 @@ section {
     gap: 10px;
     margin-top: 15px;
     padding: 15px;
-    background: var(--color-bg-tertiary);
-    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
 }
 
 .addons-list.active {
     display: flex;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pricing-card-featured .addons-list {
+    background: rgba(0, 0, 0, 0.35);
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
 .addon-item {
@@ -1365,6 +1401,14 @@ section {
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--color-success);
+}
+
+.pricing-card-featured .addon-item {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.pricing-card-featured .addon-name {
+    color: rgba(255, 255, 255, 0.85);
 }
 
 .pricing-note {
