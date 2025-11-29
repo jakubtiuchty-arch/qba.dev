@@ -1425,6 +1425,169 @@ section {
 }
 
 /* ============================================
+   ABOUT SECTION
+   ============================================ */
+.about {
+    background: var(--color-bg-primary);
+}
+
+.about-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 60px;
+    align-items: start;
+}
+
+.about-content {
+    padding-right: 20px;
+}
+
+.about-text p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--color-text-secondary);
+    margin-bottom: 20px;
+}
+
+.about-text p:last-child {
+    margin-bottom: 0;
+}
+
+.about-text strong {
+    color: var(--color-text-primary);
+}
+
+.about-text em {
+    color: var(--color-accent-1);
+    font-style: italic;
+}
+
+.about-signature {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid var(--color-border);
+}
+
+.signature-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.signature-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    font-family: var(--font-heading);
+}
+
+.signature-role {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.about-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.about-card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 20px;
+    padding: 35px;
+    transition: var(--transition-medium);
+}
+
+.about-card:hover {
+    border-color: var(--color-border-hover);
+    transform: translateY(-5px);
+}
+
+.about-card-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.about-card-icon svg {
+    width: 26px;
+    height: 26px;
+    stroke: white;
+}
+
+.about-card h4 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 20px;
+}
+
+.about-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.about-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    font-size: 0.95rem;
+}
+
+.about-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.list-icon {
+    color: var(--color-accent-1);
+    font-weight: 600;
+}
+
+.about-quote {
+    background: linear-gradient(135deg, var(--color-accent-1), var(--color-accent-2));
+    border-radius: 20px;
+    padding: 30px 35px;
+    position: relative;
+}
+
+.about-quote blockquote {
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: white;
+    line-height: 1.6;
+    margin: 0;
+    font-style: italic;
+}
+
+/* About Section Responsive */
+@media (max-width: 968px) {
+    .about-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+
+    .about-content {
+        padding-right: 0;
+    }
+
+    .about-text p {
+        font-size: 1rem;
+    }
+}
+
+/* ============================================
    GUARANTEES SECTION
    ============================================ */
 .guarantees {
