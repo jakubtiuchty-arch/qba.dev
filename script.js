@@ -247,7 +247,7 @@ function initContactForm() {
     const form = document.getElementById('contact-form');
     if (!form) return;
 
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
 
         // Get form data
@@ -268,20 +268,38 @@ function initContactForm() {
             return;
         }
 
-        // Simulate form submission
+        // Send form via API
         const submitBtn = form.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
         submitBtn.innerHTML = '<span>Wysyłanie...</span>';
         submitBtn.disabled = true;
         submitBtn.style.opacity = '0.7';
 
-        setTimeout(() => {
-            showNotification('Dziękuję! Wiadomość została wysłana. Odezwę się w ciągu 24h.', 'success');
-            form.reset();
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-            submitBtn.style.opacity = '1';
-        }, 1500);
+        try {
+            const response = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showNotification('Dziękuję! Wiadomość została wysłana. Odezwę się w ciągu 24h.', 'success');
+                form.reset();
+            } else {
+                showNotification(result.error || 'Błąd wysyłania. Spróbuj ponownie.', 'error');
+            }
+        } catch (error) {
+            console.error('Form error:', error);
+            showNotification('Błąd połączenia. Spróbuj ponownie.', 'error');
+        }
+
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
     });
 }
 
