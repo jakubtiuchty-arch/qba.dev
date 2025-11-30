@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initContactForm();
     initTypingEffect();
     initPortfolioModal();
+    initCookieBanner();
 });
 
 /**
@@ -831,5 +832,39 @@ function initPortfolioModal() {
         if (e.key === 'Escape' && modal.classList.contains('active')) {
             closeModal();
         }
+    });
+}
+
+/**
+ * Cookie Banner
+ */
+function initCookieBanner() {
+    const banner = document.getElementById('cookie-banner');
+    const acceptBtn = document.getElementById('cookie-accept');
+    const rejectBtn = document.getElementById('cookie-reject');
+
+    if (!banner) return;
+
+    // Check if user already made a choice
+    const cookieConsent = localStorage.getItem('cookieConsent');
+
+    if (!cookieConsent) {
+        // Show banner after a short delay
+        setTimeout(() => {
+            banner.classList.add('active');
+        }, 1500);
+    }
+
+    // Accept cookies
+    acceptBtn.addEventListener('click', () => {
+        localStorage.setItem('cookieConsent', 'accepted');
+        banner.classList.remove('active');
+        // Here you can initialize analytics, etc.
+    });
+
+    // Reject cookies
+    rejectBtn.addEventListener('click', () => {
+        localStorage.setItem('cookieConsent', 'rejected');
+        banner.classList.remove('active');
     });
 }
