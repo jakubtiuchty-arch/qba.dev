@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Post 04 - Code Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        .post {
+            width: 1080px;
+            height: 1080px;
+            background: #0a0a0f;
+            font-family: 'Sora', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px;
+            position: relative;
+        }
+
+        .code-window {
+            background: #1e1e2e;
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 900px;
+            border: 1px solid #333;
+        }
+
+        .window-dots {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #ff5f56; }
+        .dot-yellow { background: #ffbd2e; }
+        .dot-green { background: #27ca40; }
+
+        .code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 28px;
+            line-height: 1.8;
+        }
+
+        .keyword { color: #c678dd; }
+        .variable { color: #e5c07b; }
+        .string { color: #98c379; }
+        .property { color: #e06c75; }
+        .value { color: #61afef; }
+        .comment { color: #6b7280; }
+        .bracket { color: #abb2bf; }
+
+        .title {
+            text-align: center;
+            font-size: 42px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 50px;
+        }
+
+        .title span {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo {
+            position: absolute;
+            bottom: 60px;
+            right: 60px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .logo span { color: #a855f7; }
+    </style>
+</head>
+<body>
+    <div class="post">
+        <h1 class="title">Co dostajesz <span>ode mnie?</span></h1>
+
+        <div class="code-window">
+            <div class="window-dots">
+                <div class="dot dot-red"></div>
+                <div class="dot dot-yellow"></div>
+                <div class="dot dot-green"></div>
+            </div>
+            <div class="code">
+                <span class="keyword">const</span> <span class="variable">pakiet</span> <span class="bracket">= {</span><br>
+                &nbsp;&nbsp;<span class="property">design</span>: <span class="string">"unikalny"</span>,<br>
+                &nbsp;&nbsp;<span class="property">responsive</span>: <span class="value">true</span>,<br>
+                &nbsp;&nbsp;<span class="property">seo</span>: <span class="value">true</span>,<br>
+                &nbsp;&nbsp;<span class="property">wsparcie</span>: <span class="string">"30 dni"</span>,<br>
+                &nbsp;&nbsp;<span class="property">kodNależyDoTiebie</span>: <span class="value">true</span><br>
+                <span class="bracket">}</span>
+            </div>
+        </div>
+
+        <div class="logo">&lt;qba<span>.</span>dev/&gt;</div>
+    </div>
+</body>
+</html>

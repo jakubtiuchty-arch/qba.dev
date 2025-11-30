@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Post 02 - Gotowy w 7 dni</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        .post {
+            width: 1080px;
+            height: 1080px;
+            background: #0a0a0f;
+            font-family: 'Sora', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .post::before {
+            content: '';
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            border-radius: 50%;
+            filter: blur(150px);
+            opacity: 0.3;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .big-number {
+            font-size: 280px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .label {
+            font-size: 72px;
+            font-weight: 600;
+            color: #ffffff;
+            margin-top: -20px;
+        }
+
+        .subtext {
+            font-size: 32px;
+            color: #94a3b8;
+            margin-top: 40px;
+            line-height: 1.5;
+        }
+
+        .subtext strong {
+            color: #ffffff;
+        }
+
+        .logo {
+            position: absolute;
+            bottom: 60px;
+            right: 60px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .logo span { color: #a855f7; }
+    </style>
+</head>
+<body>
+    <div class="post">
+        <div class="content">
+            <div class="big-number">7</div>
+            <div class="label">DNI</div>
+            <p class="subtext">Nie za miesiąc. Nie za kwartał.<br><strong>W 7 dni masz gotową stronę.</strong></p>
+        </div>
+
+        <div class="logo">&lt;qba<span>.</span>dev/&gt;</div>
+    </div>
+</body>
+</html>

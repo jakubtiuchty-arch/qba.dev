@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Post 01</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        .post {
+            width: 1080px;
+            height: 1080px;
+            background: #0a0a0f;
+            font-family: 'Sora', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .post::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 64px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 60px;
+            line-height: 1.2;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .list {
+            text-align: left;
+            margin: 40px 0;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 36px;
+            color: #e2e8f0;
+            margin-bottom: 30px;
+        }
+
+        .list-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .cta {
+            margin-top: 60px;
+            font-size: 28px;
+            color: #6366f1;
+            font-weight: 500;
+        }
+
+        .logo {
+            position: absolute;
+            bottom: 60px;
+            right: 60px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .logo span { color: #a855f7; }
+    </style>
+</head>
+<body>
+    <div class="post">
+        <div class="content">
+            <h1>Dlaczego Twoja strona<br><span class="gradient-text">nie sprzedaje?</span></h1>
+
+            <div class="list">
+                <div class="list-item">
+                    <div class="list-number">1</div>
+                    <span>Brak wyraźnego CTA</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-number">2</div>
+                    <span>Za wolne ładowanie</span>
+                </div>
+                <div class="list-item">
+                    <div class="list-number">3</div>
+                    <span>Nieczytelny design</span>
+                </div>
+            </div>
+
+            <p class="cta">Czy Twoja strona ma któryś z nich?</p>
+        </div>
+
+        <div class="logo">&lt;qba<span>.</span>dev/&gt;</div>
+    </div>
+</body>
+</html>

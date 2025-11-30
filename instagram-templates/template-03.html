@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Post 03 - Quote</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        .post {
+            width: 1080px;
+            height: 1080px;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #06b6d4 100%);
+            font-family: 'Sora', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 100px;
+            position: relative;
+        }
+
+        .quote-mark {
+            font-size: 200px;
+            color: rgba(255, 255, 255, 0.2);
+            position: absolute;
+            top: 60px;
+            left: 80px;
+            font-family: Georgia, serif;
+            line-height: 1;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        blockquote {
+            font-size: 56px;
+            font-weight: 600;
+            color: #ffffff;
+            line-height: 1.4;
+            max-width: 800px;
+        }
+
+        .author {
+            margin-top: 60px;
+            font-size: 28px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .logo {
+            position: absolute;
+            bottom: 60px;
+            right: 60px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .logo span { color: rgba(255, 255, 255, 0.6); }
+    </style>
+</head>
+<body>
+    <div class="post">
+        <div class="quote-mark">"</div>
+        <div class="content">
+            <blockquote>
+                Nie buduję stron.<br>
+                Buduję narzędzia, które pomagają Ci zarabiać.
+            </blockquote>
+            <p class="author">— Kuba, qba.dev</p>
+        </div>
+
+        <div class="logo">&lt;qba<span>.</span>dev/&gt;</div>
+    </div>
+</body>
+</html>
