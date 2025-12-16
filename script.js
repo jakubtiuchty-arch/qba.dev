@@ -192,7 +192,7 @@ function initCounterAnimation() {
  */
 function initScrollAnimations() {
     const animatedElements = document.querySelectorAll(
-        '.service-card, .process-step, .pricing-card, .tech-category, .problem-item, .guarantee-card, .about-card, .about-quote'
+        '.service-card, .process-step, .pricing-card, .tech-category, .problem-item, .guarantee-card, .about-card, .about-quote, .portfolio-item'
     );
 
     if (animatedElements.length === 0) return;
