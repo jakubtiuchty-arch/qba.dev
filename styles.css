@@ -519,6 +519,7 @@ a {
     gap: 40px;
     animation: fadeInUp 0.8s ease 1.2s forwards;
     opacity: 0;
+    margin-bottom: 80px;
 }
 
 .stat {
