@@ -1,0 +1,90 @@
+---
+import { nav, site } from '../data/site';
+
+const { company, contact, profiles, area } = site;
+const year = new Date().getFullYear();
+const pageSpeedUrl = `https://pagespeed.web.dev/analysis?url=${encodeURIComponent(new URL(Astro.url.pathname, site.url).href)}`;
+const profileLinks = [
+  profiles.googleBusiness && { href: profiles.googleBusiness, label: 'Profil w Google' },
+  profiles.linkedin && { href: profiles.linkedin, label: 'LinkedIn' },
+  profiles.github && { href: profiles.github, label: 'GitHub' },
+].filter(Boolean) as { href: string; label: string }[];
+---
+
+<footer class="site-footer">
+  <div class="container grid">
+    <section aria-labelledby="stopka-kontakt">
+      <h2 id="stopka-kontakt" class="footer-title">Kontakt</h2>
+      <p>
+        <a href={contact.phoneHref}>{contact.phone}</a><br />
+        <a href={`mailto:${contact.email}`}>{contact.email}</a><br />
+        <span class="muted">{contact.hours}</span>
+      </p>
+      <p class="muted">Obszar działania: {area.label}</p>
+    </section>
+
+    <nav aria-labelledby="stopka-strony">
+      <h2 id="stopka-strony" class="footer-title">Strony</h2>
+      <ul>
+        <li><a href="/">Strona główna</a></li>
+        {nav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
+        <li><a href="/polityka-prywatnosci/">Polityka prywatności</a></li>
+        {profileLinks.map((p) => <li><a href={p.href} rel="me">{p.label}</a></li>)}
+      </ul>
+    </nav>
+
+    <section aria-labelledby="stopka-firma">
+      <h2 id="stopka-firma" class="footer-title">Dane firmy</h2>
+      <address>
+        {company.name}<br />
+        {company.street}, {company.postalCode} {company.city}<br />
+        NIP {company.nip}, REGON {company.regon}<br />
+        KRS {company.krs}, {company.court}<br />
+        Kapitał zakładowy: {company.capital}
+      </address>
+    </section>
+  </div>
+
+  <div class="container bottom">
+    <p>© {year} {site.brand} · {company.name}</p>
+    <p data-page-weight>
+      Ta strona waży <span data-page-weight-value>__PAGE_WEIGHT__</span> razem z fontami i zdjęciami. Nie używa ciasteczek
+      ani skryptów śledzących. <a href={pageSpeedUrl}>Sprawdź w PageSpeed Insights</a>.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-section);
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+    font-size: var(--step--1);
+  }
+  .grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    padding-block: 3rem 2rem;
+  }
+  .footer-title {
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+  ul { list-style: none; margin: 0; padding: 0; }
+  li { margin-bottom: 0.35rem; }
+  li a, p a { display: inline-block; min-height: 1.5rem; }
+  address { font-style: normal; color: var(--muted); }
+  .bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    padding-block: 1.25rem 2rem;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+  }
+  .bottom p { margin: 0; max-width: 60ch; }
+</style>

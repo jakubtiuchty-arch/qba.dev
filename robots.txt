@@ -1,7 +1,0 @@
-# robots.txt for qba.dev
-
-User-agent: *
-Allow: /
-
-# Sitemap
-Sitemap: https://qba.dev/sitemap.xml

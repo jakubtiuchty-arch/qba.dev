@@ -1,0 +1,131 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../data/site';
+
+import displayLatin from '@fontsource/poltawski-nowy/files/poltawski-nowy-latin-600-normal.woff2?url';
+import displayLatinExt from '@fontsource/poltawski-nowy/files/poltawski-nowy-latin-ext-600-normal.woff2?url';
+import bodyLatin from '@fontsource-variable/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-wght-normal.woff2?url';
+import bodyLatinExt from '@fontsource-variable/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-ext-wght-normal.woff2?url';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Dodatkowe obiekty JSON-LD dla tej podstrony (np. BreadcrumbList). */
+  jsonLd?: Record<string, unknown>[];
+  ogImageAlt?: string;
+  noindex?: boolean;
+}
+
+const { title, description, jsonLd = [], ogImageAlt, noindex = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, site.url).href;
+const ogImage = new URL('/og-image.jpg', site.url).href;
+
+const LATIN = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD';
+const LATIN_EXT = 'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF';
+
+const face = (family: string, url: string, range: string, weight: string) =>
+  `@font-face{font-family:'${family}';font-style:normal;font-display:swap;font-weight:${weight};src:url(${url}) format('woff2');unicode-range:${range}}`;
+
+const fontCss = [
+  face('Poltawski Nowy', displayLatin, LATIN, '600'),
+  face('Poltawski Nowy', displayLatinExt, LATIN_EXT, '600'),
+  face('Atkinson Hyperlegible Next Variable', bodyLatin, LATIN, '200 800'),
+  face('Atkinson Hyperlegible Next Variable', bodyLatinExt, LATIN_EXT, '200 800'),
+].join('');
+
+const { company, contact, person, profiles, area } = site;
+
+const organizationLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  '@id': `${site.url}/#firma`,
+  name: site.brand,
+  description: 'Projektowanie i kodowanie stron internetowych dla firm z Trzebnicy, Wrocławia i okolic.',
+  url: `${site.url}/`,
+  email: contact.email,
+  telephone: contact.phoneE164,
+  image: ogImage,
+  priceRange: '2500–7500 zł netto',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: company.street.replace(/^ul\.\s*/, ''),
+    postalCode: company.postalCode,
+    addressLocality: company.city,
+    addressCountry: 'PL',
+  },
+  areaServed: area.places.map((name) => ({ '@type': 'Place', name })),
+  openingHoursSpecification: {
+    '@type': 'OpeningHoursSpecification',
+    dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+    opens: '09:00',
+    closes: '17:00',
+  },
+  founder: { '@id': `${site.url}/#jakub` },
+  parentOrganization: {
+    '@type': 'Organization',
+    name: company.name,
+    taxID: company.nip,
+    identifier: `KRS ${company.krs}`,
+  },
+  sameAs: [profiles.googleBusiness, profiles.linkedin].filter(Boolean),
+};
+
+const personLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  '@id': `${site.url}/#jakub`,
+  name: person.name,
+  jobTitle: 'Web developer',
+  url: `${site.url}/o-mnie/`,
+  worksFor: { '@id': `${site.url}/#firma` },
+  sameAs: [profiles.linkedin, profiles.github].filter(Boolean),
+};
+
+const ld = [organizationLd, personLd, ...jsonLd];
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#fbfbfc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1d22" media="(prefers-color-scheme: dark)" />
+
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.brand} />
+    <meta property="og:locale" content="pl_PL" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt ?? 'qba.dev — Jakub Tiuchty, strony internetowe dla firm z Trzebnicy i okolic'} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preload" href={bodyLatin} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={displayLatin} as="font" type="font/woff2" crossorigin />
+    <style is:inline set:html={fontCss}></style>
+
+    {ld.map((item) => <script type="application/ld+json" is:inline set:html={JSON.stringify(item)} />)}
+  </head>
+  <body>
+    <a class="skip-link" href="#tresc">Przejdź do treści</a>
+    <Header />
+    <main id="tresc" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

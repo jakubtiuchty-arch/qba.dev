@@ -1,0 +1,54 @@
+---
+import { testimonials } from '../data/site';
+
+interface Props {
+  /** Pokaż tylko opinie powiązane z tą realizacją. */
+  project?: string;
+  heading?: string;
+  headingId?: string;
+}
+
+const { project, heading = 'Co mówią klienci', headingId = 'opinie' } = Astro.props;
+const items = project ? testimonials.filter((t) => t.project === project) : testimonials;
+---
+
+{
+  items.length > 0 && (
+    <section class="testimonials" aria-labelledby={headingId}>
+      <h2 id={headingId}>{heading}</h2>
+      <div class="testimonials__list">
+        {items.map((t) => (
+          <figure class="quote">
+            <blockquote>
+              <p>{t.quote}</p>
+            </blockquote>
+            <figcaption>
+              <strong>{t.author}</strong>
+              <br />
+              {t.url ? <a href={t.url}>{t.company}</a> : t.company}, {t.town}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .testimonials__list {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  }
+  .quote { margin: 0; }
+  .quote blockquote {
+    margin: 0 0 0.75rem;
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    line-height: 1.45;
+  }
+  .quote blockquote p::before { content: '„'; }
+  .quote blockquote p::after { content: '”'; }
+  .quote figcaption { color: var(--muted); font-size: var(--step--1); }
+  .quote figcaption strong { color: var(--ink); }
+</style>

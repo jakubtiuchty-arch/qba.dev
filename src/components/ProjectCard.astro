@@ -1,0 +1,73 @@
+---
+import { Picture } from 'astro:assets';
+import type { Project } from '../data/projects';
+
+interface Props {
+  project: Project;
+  /** Poziom nagłówka nazwy projektu, zależnie od miejsca na stronie. */
+  headingLevel?: 2 | 3;
+  /** true dla pierwszego obrazka na ekranie (bez leniwego ładowania). */
+  eager?: boolean;
+}
+
+const { project, headingLevel = 3, eager = false } = Astro.props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+---
+
+<article class="project">
+  <a class="project__media" href={`/realizacje/${project.slug}/`} tabindex="-1" aria-hidden="true">
+    <Picture
+      src={project.image}
+      alt=""
+      formats={['avif', 'webp']}
+      fallbackFormat="jpg"
+      widths={[480, 800, 1200]}
+      sizes="(min-width: 60rem) 36rem, 100vw"
+      loading={eager ? 'eager' : 'lazy'}
+      fetchpriority={eager ? 'high' : undefined}
+    />
+  </a>
+  <div class="project__body">
+    <p class="project__sector">{project.sector}</p>
+    <Heading class="project__name">
+      <a href={`/realizacje/${project.slug}/`}>{project.name}</a>
+    </Heading>
+    <p>{project.summary}</p>
+  </div>
+</article>
+
+<style>
+  .project {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+  }
+  .project__media {
+    display: block;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .project__media :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    object-position: top;
+  }
+  .project__sector {
+    margin: 0 0 0.25rem;
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+  .project__name {
+    font-size: var(--step-2);
+    margin-bottom: 0.4rem;
+  }
+  .project__name a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .project__name a:hover { text-decoration: underline; text-underline-offset: 0.15em; }
+  .project__body p:last-child { margin-bottom: 0; }
+</style>
