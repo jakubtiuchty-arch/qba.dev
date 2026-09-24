@@ -3,6 +3,8 @@ import { nav, site } from '../data/site';
 
 const { company, contact, profiles, area } = site;
 const year = new Date().getFullYear();
+const current = Astro.url.pathname;
+const isErrorPage = current.startsWith('/404');
 const pageSpeedUrl = `https://pagespeed.web.dev/analysis?url=${encodeURIComponent(new URL(Astro.url.pathname, site.url).href)}`;
 const profileLinks = [
   profiles.googleBusiness && { href: profiles.googleBusiness, label: 'Profil w Google' },
@@ -26,9 +28,9 @@ const profileLinks = [
     <nav aria-labelledby="stopka-strony">
       <h2 id="stopka-strony" class="footer-title">Strony</h2>
       <ul>
-        <li><a href="/">Strona główna</a></li>
-        {nav.map((item) => <li><a href={item.href}>{item.label}</a></li>)}
-        <li><a href="/polityka-prywatnosci/">Polityka prywatności</a></li>
+        {[{ href: '/', label: 'Strona główna' }, ...nav, { href: '/polityka-prywatnosci/', label: 'Polityka prywatności' }].map((item) => (
+          <li><a href={item.href} aria-current={current === item.href ? 'page' : undefined}>{item.label}</a></li>
+        ))}
         {profileLinks.map((p) => <li><a href={p.href} rel="me">{p.label}</a></li>)}
       </ul>
     </nav>
@@ -49,7 +51,7 @@ const profileLinks = [
     <p>© {year} {site.brand} · {company.name}</p>
     <p data-page-weight>
       Ta strona waży <span data-page-weight-value>__PAGE_WEIGHT__</span> razem z fontami i zdjęciami. Nie używa ciasteczek
-      ani skryptów śledzących. <a href={pageSpeedUrl}>Sprawdź w PageSpeed Insights</a>.
+      ani skryptów śledzących.{!isErrorPage && <> <a href={pageSpeedUrl}>Sprawdź w PageSpeed Insights</a>.</>}
     </p>
   </div>
 </footer>

@@ -2,14 +2,20 @@
 import { nav, site } from '../data/site';
 
 const current = Astro.url.pathname;
-const isCurrent = (href: string) => current === href || (href !== '/' && current.startsWith(href));
+// „page” dla bieżącej podstrony, „true” dla działu, w którym jesteśmy (np. opis realizacji w „Realizacjach”).
+const ariaCurrent = (href: string) =>
+  current === href ? 'page' : href !== '/' && current.startsWith(href) ? 'true' : undefined;
 ---
 
 <header class="site-header">
   <div class="container bar">
-    <a class="wordmark" href="/" aria-label="qba.dev — strona główna">
+    <a class="wordmark" href="/">
       <span class="wordmark__brand">qba.dev</span>
-      <span class="wordmark__name">Jakub Tiuchty</span>
+      <span class="wordmark__name">Jakub Tiuchty<span class="visually-hidden"> – strona główna</span></span>
+    </a>
+
+    <a class="bar__phone" href={site.contact.phoneHref}>
+      <span class="visually-hidden">Zadzwoń: </span>{site.contact.phone}
     </a>
 
     <button class="menu-toggle" type="button" popovertarget="menu" aria-controls="menu">
@@ -20,13 +26,10 @@ const isCurrent = (href: string) => current === href || (href !== '/' && current
       <ul>
         {nav.map((item) => (
           <li>
-            <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a>
+            <a href={item.href} aria-current={ariaCurrent(item.href)}>{item.label}</a>
           </li>
         ))}
       </ul>
-      <a class="menu__phone" href={site.contact.phoneHref}>
-        <span class="visually-hidden">Zadzwoń: </span>{site.contact.phone}
-      </a>
       <button class="menu__close" type="button" popovertarget="menu" popovertargetaction="hide">
         Zamknij menu
       </button>
@@ -64,6 +67,13 @@ const isCurrent = (href: string) => current === href || (href !== '/' && current
   .wordmark__name {
     font-size: var(--step--1);
     color: var(--muted);
+  }
+
+  .bar__phone {
+    margin-left: auto;
+    font-weight: 700;
+    white-space: nowrap;
+    padding-block: 0.6rem;
   }
 
   .menu-toggle {
@@ -111,14 +121,10 @@ const isCurrent = (href: string) => current === href || (href !== '/' && current
     font-size: var(--step-1);
     text-decoration: none;
   }
-  .menu a[aria-current='page'] {
+  .menu a[aria-current] {
     text-decoration: underline;
     text-decoration-thickness: 2px;
     text-underline-offset: 0.3em;
-  }
-  .menu__phone {
-    font-weight: 700;
-    padding-block: 0.5rem;
   }
   .menu__close {
     order: -1;
@@ -161,6 +167,7 @@ const isCurrent = (href: string) => current === href || (href !== '/' && current
       font-size: 1rem;
     }
     .menu li a:hover { text-decoration: underline; text-underline-offset: 0.3em; }
-    .menu__phone { font-size: 1rem; }
+    .bar__phone { order: 3; margin-left: 0; font-size: 1rem; }
+    .menu { margin-left: auto; }
   }
 </style>

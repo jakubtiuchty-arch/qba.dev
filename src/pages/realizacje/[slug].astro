@@ -1,0 +1,329 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Testimonials from '../../components/Testimonials.astro';
+import Breadcrumbs from '../../components/projects/Breadcrumbs.astro';
+import ProjectsContact from '../../components/projects/ProjectsContact.astro';
+import { site, testimonials } from '../../data/site';
+import { projects, type Project } from '../../data/projects';
+
+export function getStaticPaths() {
+  return projects.map((project, index) => ({
+    params: { slug: project.slug },
+    props: {
+      project,
+      // Następna realizacja w kolejności z projects.ts; po ostatniej wracamy do pierwszej.
+      next: projects.length > 1 ? projects[(index + 1) % projects.length] : null,
+    },
+  }));
+}
+
+interface Props {
+  project: Project;
+  next: Project | null;
+}
+
+const { project, next } = Astro.props;
+const pageUrl = `${site.url}/realizacje/${project.slug}/`;
+
+// Pola `null` i puste tablice nie są pokazywane (brief, §2).
+const results = project.results && project.results.length > 0 ? project.results : null;
+const testimonialCount = testimonials.filter((t) => t.project === project.slug).length;
+
+const title = `${project.name} – realizacja | ${site.brand}`;
+
+// Opis dla wyszukiwarki (120–160 znaków): `summary` z projects.ts plus najdłuższe dopowiedzenie, które się mieści.
+const DESC_MIN = 120;
+const DESC_MAX = 160;
+const descriptionVariants = [
+  `${project.summary} Zakres prac i link do strony ${project.domain}.`,
+  `${project.summary} Zakres prac i link do strony.`,
+  `${project.summary} Zakres prac.`,
+  project.summary,
+];
+const clip = (text: string) => {
+  if (text.length <= DESC_MAX) return text;
+  const cut = text.slice(0, DESC_MAX - 1);
+  return `${cut.slice(0, cut.lastIndexOf(' ')).replace(/[\s,.:;–-]+$/, '')}…`;
+};
+const description =
+  descriptionVariants.find((text) => text.length >= DESC_MIN && text.length <= DESC_MAX) ?? clip(descriptionVariants[0]);
+if (description.length < DESC_MIN || description.length > DESC_MAX) {
+  console.warn(`[realizacje/${project.slug}] description ma ${description.length} znaków (zalecane ${DESC_MIN}–${DESC_MAX}).`);
+}
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Strona główna', item: `${site.url}/` },
+      { '@type': 'ListItem', position: 2, name: 'Realizacje', item: `${site.url}/realizacje/` },
+      { '@type': 'ListItem', position: 3, name: project.name, item: pageUrl },
+    ],
+  },
+];
+---
+
+<Base title={title} description={description} jsonLd={jsonLd}>
+  <section class="section head" aria-labelledby="projekt-tytul">
+    <div class="container">
+      <Breadcrumbs
+        items={[
+          { label: 'Strona główna', href: '/' },
+          { label: 'Realizacje', href: '/realizacje/' },
+          { label: project.name },
+        ]}
+      />
+
+      <h1 id="projekt-tytul" class="head__title">{project.name}</h1>
+      <p class="lead">{project.summary}</p>
+
+      <dl class="meta">
+        <div>
+          <dt>Branża i&nbsp;klienci</dt>
+          <dd>{project.sector}</dd>
+        </div>
+        {
+          project.year != null && (
+            <div>
+              <dt>Rok</dt>
+              <dd>{project.year}</dd>
+            </div>
+          )
+        }
+      </dl>
+
+      <p class="visit">
+        <a class="btn btn--outline" href={project.url}>Zobacz stronę {project.domain}</a>
+      </p>
+
+      <figure class="shot">
+        <div class="shot__frame">
+          <Picture
+            src={project.image}
+            alt={project.imageAlt}
+            formats={['avif', 'webp']}
+            fallbackFormat="jpg"
+            widths={[480, 800, 1200, 1600, 2400]}
+            sizes="(min-width: 76rem) 74rem, calc(100vw - 2rem)"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </div>
+        <figcaption class="small muted">Zrzut ekranu strony {project.domain} w&nbsp;wersji na komputer.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <div class="section details">
+    <div class="container">
+      <section class="row" aria-labelledby="klient-i-cel">
+        <h2 id="klient-i-cel" class="row__title">Klient i cel</h2>
+        <div class="row__body">
+          <p>{project.context}</p>
+        </div>
+      </section>
+
+      <section class="row" aria-labelledby="zakres-prac">
+        <h2 id="zakres-prac" class="row__title">Zakres prac</h2>
+        <div class="row__body">
+          <ul class="checklist">
+            {project.scope.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+      </section>
+
+      {/* Pole `stack` zawiera dziś u części realizacji cechy strony, a nie technologie, stąd neutralny nagłówek. */}
+      <section class="row" aria-labelledby="w-skrocie">
+        <h2 id="w-skrocie" class="row__title">W&nbsp;skrócie</h2>
+        <div class="row__body">
+          <ul class="stack" role="list">
+            {project.stack.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+      </section>
+
+      {
+        results && (
+          <section class="row" aria-labelledby="efekty">
+            <h2 id="efekty" class="row__title">Efekty</h2>
+            <div class="row__body">
+              <ul class="checklist">
+                {results.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        )
+      }
+    </div>
+  </div>
+
+  {
+    testimonialCount > 0 && (
+      <div class="section">
+        <div class="container">
+          <Testimonials project={project.slug} heading={testimonialCount > 1 ? 'Opinie klienta' : 'Opinia klienta'} />
+        </div>
+      </div>
+    )
+  }
+
+  {
+    next && (
+      <div class="section more">
+        <nav class="container" aria-label="Inne realizacje">
+          <a class="next" href={`/realizacje/${next.slug}/`}>
+            <span class="next__label">Następna realizacja:</span>{' '}
+            <span class="next__name">{next.name}</span>
+          </a>
+          <p class="next__summary muted">{next.summary}</p>
+          <p class="all">
+            <a href="/realizacje/">Zobacz wszystkie realizacje</a>
+          </p>
+        </nav>
+      </div>
+    )
+  }
+
+  <ProjectsContact />
+</Base>
+
+<style>
+  /* Nagłówek realizacji: okruszki, nazwa, branża, link do strony klienta i duży zrzut. */
+  .head {
+    padding-block: clamp(1.5rem, 1rem + 2vw, 2.5rem) var(--space-l);
+  }
+  .head__title {
+    margin-top: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  }
+  /* Długość wiersza: --measure (66ch) daje w tym kroju ok. 95 znaków, a zasada to ok. 66.
+     30em przy --step-1 i 46ch przy --step-0 to ok. 66 znaków. */
+  .head .lead {
+    max-width: 30em;
+    margin-bottom: 1.25rem;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2.5rem;
+    margin: 0 0 1.5rem;
+  }
+  .meta dt {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+  .meta dd {
+    margin: 0;
+  }
+
+  .visit {
+    margin: 0 0 var(--space-l);
+  }
+  .visit .btn {
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
+
+  .shot {
+    margin: 0;
+  }
+  .shot__frame {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .shot__frame :global(img) {
+    width: 100%;
+  }
+  .shot figcaption {
+    margin-top: 0.75rem;
+  }
+
+  /* Opis: nagłówek po lewej, treść po prawej, wiersze oddzielone linią.
+     Linia nad pierwszym wierszem oddziela opis od zrzutu, więc sekcja nie potrzebuje własnej. */
+  .details {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .row {
+    display: grid;
+    gap: 0.75rem 2rem;
+    padding-block: 1.75rem;
+    border-top: 1px solid var(--line);
+  }
+  .row__title {
+    font-size: var(--step-2);
+    margin: 0;
+  }
+  .row__body {
+    max-width: 46ch;
+  }
+  .row__body > :last-child,
+  .row__body .checklist li:last-child {
+    margin-bottom: 0;
+  }
+
+  /* W skrócie: zwykła lista pionowa, każda pozycja w osobnym wierszu. */
+  .stack {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .stack li + li {
+    margin-top: 0.35em;
+  }
+
+  @media (min-width: 48rem) {
+    .row {
+      grid-template-columns: 15rem minmax(0, 1fr);
+      align-items: baseline;
+    }
+  }
+
+  /* Następna realizacja */
+  .more {
+    padding-block: var(--space-l) var(--space-section);
+  }
+  .next {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .next__label {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+  .next__name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--step-3);
+    line-height: 1.12;
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.15em;
+  }
+  .next:hover .next__name {
+    color: var(--accent-strong);
+    text-decoration-thickness: 2px;
+  }
+  .next__summary {
+    max-width: 46ch;
+    margin: 0.75rem 0 0;
+  }
+  .all {
+    margin: 1.25rem 0 0;
+    font-weight: 700;
+  }
+  .all a {
+    display: inline-block;
+    min-height: 1.5rem;
+  }
+</style>

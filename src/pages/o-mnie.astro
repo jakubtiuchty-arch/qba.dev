@@ -1,0 +1,479 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Testimonials from '../components/Testimonials.astro';
+import { site, pricing, guarantees, testimonials, process as steps } from '../data/site';
+import { projects } from '../data/projects';
+import { personPhoto } from '../data/photos';
+
+const { person, contact, company, profiles, area } = site;
+const photo = personPhoto();
+
+// „O mnie – Jakub Tiuchty, strony dla firm z Trzebnicy” (51 znaków). Bez „strony z Trzebnicy” – to sugerowałoby miejsce zamieszkania.
+const title = `O mnie – ${person.name}, strony dla firm z Trzebnicy`;
+const description =
+  'Jestem Jakub Tiuchty. Projektuję i koduję strony dla firm z Trzebnicy, Wrocławia i okolic. Pracuję sam, od pierwszego telefonu do publikacji i po niej.';
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Strona główna', item: `${site.url}/` },
+      { '@type': 'ListItem', position: 2, name: 'O mnie', item: `${site.url}/o-mnie/` },
+    ],
+  },
+];
+
+const nbsp = '\u00a0';
+
+// Twarda spacja po liczbach („24 godzin”, „30 minut”) i między dwoma skrótowcami („EZD RP”).
+// Jednoliterowe słowa wiąże już integracja page-weight.
+const tie = (text: string) =>
+  text.replace(/(?<=^|\s)(\d+) /g, `$1${nbsp}`).replace(/\b([A-Z]{2,}) (?=[A-Z]{2,}\b)/g, `$1${nbsp}`);
+
+// „A, B i C”
+const joinPl = (items: readonly string[]) =>
+  items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} i${nbsp}${items[items.length - 1]}`;
+
+// Przykłady do wstępu, wybierane po polu `stack` w projects.ts (bez wpisanych na sztywno nazw):
+// „Robię strony firmowe, jak ta dla Lux Meble, i systemy z panelem klienta, jak Rejestratory.info i EZDRP24.”
+const siteExamples = projects.filter((p) => p.stack.includes('Strona firmowa') && !p.stack.includes('Panel klienta'));
+const panelExamples = projects.filter((p) => p.stack.includes('Panel klienta'));
+// Separator przed i-tym elementem listy „A, B i C”.
+const sep = (i: number, length: number) => (i === 0 ? '' : i === length - 1 ? ` i${nbsp}` : ', ');
+
+// Wsparcie po publikacji według pakietów: „14 dni w pakiecie Starter, 30 dni w pakiecie Pro i 60 dni w pakiecie Premium”.
+const support = joinPl(pricing.packages.map((p) => `${p.support}${nbsp}dni w${nbsp}pakiecie ${p.name}`));
+
+// Narzędzia (brief, §2). Bez logotypów i ikon.
+const tools = [
+  { label: 'Projekt', items: ['Figma'] },
+  { label: 'Kod', items: ['HTML', 'CSS', 'Sass', 'Tailwind', 'JavaScript', 'React', 'Next.js', 'Astro'] },
+  { label: 'Hosting i publikacja', items: ['Vercel', 'Cloudflare'] },
+  { label: 'Bazy danych i płatności', items: ['Supabase', 'Stripe'] },
+];
+const allTools = tools.flatMap((group) => group.items);
+// Które z tych narzędzi widać w realizacjach (pole `stack` w projects.ts).
+const toolEvidence = projects
+  .map((project) => ({ project, used: allTools.filter((tool) => project.stack.includes(tool)) }))
+  .filter((entry) => entry.used.length > 0);
+
+const vatPercent = Math.round(pricing.vatRate * 100);
+
+const profileLinks = [
+  profiles.googleBusiness && { href: profiles.googleBusiness, label: 'Profil w Google' },
+  profiles.linkedin && { href: profiles.linkedin, label: 'LinkedIn' },
+  profiles.github && { href: profiles.github, label: 'GitHub' },
+].filter(Boolean) as { href: string; label: string }[];
+---
+
+<Base title={title} description={description} jsonLd={jsonLd}>
+  <section class="section intro" aria-labelledby="o-mnie">
+    <div class="container">
+      <div class:list={['intro__grid', { 'intro__grid--photo': photo }]}>
+        <div class="intro__text">
+          <h1 id="o-mnie">{person.name}</h1>
+          <p class="lead">{person.role} dla firm z&nbsp;Trzebnicy, Wrocławia i&nbsp;okolic.</p>
+          <p class="prose">
+            Pracuję sam, więc od pierwszego telefonu do publikacji i&nbsp;po niej rozmawiasz ze mną.{' '}
+            Robię strony firmowe{siteExamples.length > 0 && [`, jak ${siteExamples.length === 1 ? 'ta' : 'te'} dla `, siteExamples.map((p, i) => [sep(i, siteExamples.length), <a href={`/realizacje/${p.slug}/`}>{p.name}</a>]), ',']}{' '}
+            i&nbsp;systemy z&nbsp;panelem klienta{panelExamples.length > 0 && [', jak ', panelExamples.map((p, i) => [sep(i, panelExamples.length), <a href={`/realizacje/${p.slug}/`}>{p.name}</a>])]}.
+          </p>
+          {person.since != null && <p class="prose">Strony robię od {person.since}&nbsp;roku.</p>}
+        </div>
+
+        {
+          photo && (
+            <div class="intro__photo">
+              <Picture
+                src={photo.src}
+                alt={photo.alt}
+                formats={['avif', 'webp']}
+                fallbackFormat="jpg"
+                widths={[360, 540, 720, 960]}
+                sizes="(min-width: 70rem) 26rem, (min-width: 56rem) calc(40vw - 2rem), 16rem"
+                loading="eager"
+                fetchpriority="high"
+              />
+            </div>
+          )
+        }
+      </div>
+
+      <dl class="facts intro__facts">
+        <div>
+          <dt>Telefon</dt>
+          <dd><a href={contact.phoneHref} class="nowrap">{contact.phone}</a></dd>
+        </div>
+        <div>
+          <dt>E-mail</dt>
+          <dd><a href={`mailto:${contact.email}`}>{contact.email}</a></dd>
+        </div>
+        <div>
+          <dt>Obszar działania</dt>
+          <dd>{area.label}</dd>
+        </div>
+        <div>
+          <dt>Faktury wystawia</dt>
+          <dd>{company.name} <span class="nowrap">(<a href="#firma">dane firmy</a>)</span></dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="jak-pracuje">
+    <div class="container split">
+      <h2 id="jak-pracuje">Jak pracuję</h2>
+      <div class="split__body">
+        <p>Tak wygląda praca nad stroną:</p>
+
+        <ol class="steps" role="list">
+          {
+            steps.map((step) => (
+              <li>
+                <h3>{step.title}</h3>
+                <p class="steps__when">{step.when}</p>
+                <p class="steps__text">{tie(step.text)}</p>
+              </li>
+            ))
+          }
+        </ol>
+
+        <h3 class="terms__title">Gwarancje i&nbsp;wsparcie</h3>
+        <dl class="terms">
+          {
+            guarantees.map((g) => (
+              <div>
+                <dt>{tie(g.title)}</dt>
+                <dd>{tie(g.text)}</dd>
+              </div>
+            ))
+          }
+          <div>
+            <dt>Wsparcie po publikacji</dt>
+            <dd>
+              Trwa {support}.<br />
+              <a href="/oferta/">Zobacz pakiety i&nbsp;ceny</a>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="realizacje">
+    <div class="container split">
+      <h2 id="realizacje">Co już zbudowałem</h2>
+      <div class="split__body">
+        <p>Przy każdej realizacji jest zakres prac i&nbsp;link do działającej strony.</p>
+
+        <ul class="work" role="list">
+          {
+            projects.map((project) => (
+              <li>
+                <h3>{project.name}</h3>
+                <p class="work__sector">{project.sector}</p>
+                <p class="work__summary">{tie(project.summary)}</p>
+                <ul class="work__scope">
+                  {project.scope.map((item) => (
+                    <li>{tie(item)}</li>
+                  ))}
+                </ul>
+                <p class="work__links">
+                  <a href={`/realizacje/${project.slug}/`}>
+                    Zobacz opis realizacji<span class="visually-hidden"> {project.name}</span>
+                  </a>
+                  <a href={project.url}>Zobacz stronę {project.domain}</a>
+                </p>
+              </li>
+            ))
+          }
+        </ul>
+
+        <p><a href="/realizacje/">Zobacz realizacje ze zrzutami ekranu</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="narzedzia">
+    <div class="container split">
+      <h2 id="narzedzia">Narzędzia</h2>
+      <div class="split__body">
+        <p>Projekty stron przygotowuję w&nbsp;Figmie, a&nbsp;kod piszę sam. Tę stronę zbudowałem w&nbsp;Astro.</p>
+        <dl class="rows">
+          {
+            tools.map((group) => (
+              <div>
+                <dt>{group.label}</dt>
+                <dd>{group.items.join(', ')}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        {
+          toolEvidence.map(({ project, used }) => (
+            <p>
+              W&nbsp;realizacji <a href={`/realizacje/${project.slug}/`}>{project.name}</a> użyłem {joinPl(used)}.
+            </p>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="firma" aria-labelledby="firma-tytul">
+    <div class="container split">
+      <h2 id="firma-tytul">Firma</h2>
+      <div class="split__body">
+        <p>Faktury wystawia {company.name}, firma, którą prowadzę.</p>
+        {
+          pricing.pricesAreNet ? (
+            <p>Ceny w&nbsp;ofercie podaję netto. Na fakturze doliczam do nich {vatPercent}%&nbsp;VAT.</p>
+          ) : (
+            <p>Ceny w&nbsp;ofercie są cenami brutto, z&nbsp;VAT.</p>
+          )
+        }
+        <dl class="rows company">
+          <div>
+            <dt>Adres</dt>
+            <dd>{company.street}, <span class="nowrap">{company.postalCode} {company.city}</span></dd>
+          </div>
+          <div>
+            <dt>NIP</dt>
+            <dd>{company.nip}</dd>
+          </div>
+          <div>
+            <dt>KRS</dt>
+            <dd>{company.krs}</dd>
+          </div>
+          <div>
+            <dt>REGON</dt>
+            <dd>{company.regon}</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  {
+    testimonials.length > 0 && (
+      <div class="section">
+        <div class="container testimonials-split">
+          <Testimonials />
+        </div>
+      </div>
+    )
+  }
+
+  <section class="section contact" aria-labelledby="kontakt">
+    <div class="container split">
+      <h2 id="kontakt">Zadzwoń albo napisz</h2>
+      <div class="split__body">
+        <p>
+          Jestem dostępny {contact.hours}. <span class="nowrap">E-mail:</span>{' '}
+          <a href={`mailto:${contact.email}`}>{contact.email}</a>. {tie(contact.responseTime)}
+        </p>
+        <div class="actions">
+          <a class="btn" href="/kontakt/">Opisz swój projekt</a>
+          <a class="btn btn--outline nowrap" href={contact.phoneHref}>Zadzwoń: {contact.phone}</a>
+        </div>
+        {
+          profileLinks.length > 0 && (
+            <>
+              <p class="profiles__intro">Znajdziesz mnie też tutaj:</p>
+              <ul class="profiles" role="list">
+                {profileLinks.map((p) => (
+                  <li>
+                    <a href={p.href} rel="me">
+                      {p.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )
+        }
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nowrap { white-space: nowrap; }
+
+  /* Wstęp: kto, co i dla kogo. Zdjęcie tylko wtedy, gdy jest w site.ts. */
+  .intro__grid {
+    display: grid;
+    gap: var(--space-l);
+    align-items: start;
+  }
+  .intro__text > :last-child { margin-bottom: 0; }
+  .intro h1 { margin-bottom: 0.4em; }
+  /* Na telefonie mniejsze zdjęcie, żeby telefon i e-mail z listy faktów nie spadły pod zgięcie. */
+  .intro__photo { max-width: 16rem; }
+  .intro__photo :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: var(--radius);
+  }
+  .intro__facts { margin-top: var(--space-l); }
+  .intro__facts a { display: inline-block; padding-block: 0.1rem; }
+
+  @media (min-width: 56rem) {
+    .intro__grid--photo { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+    .intro__photo { max-width: 26rem; justify-self: end; }
+  }
+
+  /* Sekcje: na szerokim ekranie nagłówek po lewej, treść po prawej. */
+  .split {
+    display: grid;
+    gap: 0 4rem;
+  }
+  .split__body { max-width: var(--measure); }
+  .split__body > :last-child { margin-bottom: 0; }
+
+  @media (min-width: 64rem) {
+    .split { grid-template-columns: 18rem minmax(0, 1fr); }
+    .split > h2 { margin-bottom: 0; }
+  }
+
+  /* Kroki: prawdziwa kolejność, więc <ol>. Etykieta dnia zamiast numeru.
+     W DOM nagłówek kroku stoi przed dniem (nawigacja po nagłówkach); na szerokim ekranie dzień idzie do lewej kolumny. */
+  .steps {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-m) 0 var(--space-l);
+    border-top: 1px solid var(--line);
+  }
+  .steps li {
+    display: grid;
+    grid-template-areas: 'title' 'when' 'text';
+    gap: 0.15rem 1.5rem;
+    align-items: start;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .steps h3 {
+    grid-area: title;
+    font-size: var(--step-1);
+    margin: 0;
+  }
+  .steps__when {
+    grid-area: when;
+    margin: 0 0 0.3rem;
+    color: var(--muted);
+    font-size: var(--step--1);
+  }
+  .steps__text {
+    grid-area: text;
+    margin: 0;
+  }
+
+  @media (min-width: 40rem) {
+    .steps li {
+      grid-template-columns: 6.5rem minmax(0, 1fr);
+      grid-template-areas: 'when title' 'when text';
+    }
+    .steps h3 { margin-bottom: 0.2rem; }
+    .steps__when { margin: 0; padding-top: 0.2rem; }
+  }
+
+  .terms__title {
+    font-size: var(--step-1);
+    margin: 0 0 0.5rem;
+  }
+
+  .terms,
+  .rows {
+    margin: 0 0 1em;
+    border-top: 1px solid var(--line);
+  }
+  .terms > div,
+  .rows > div {
+    padding-block: 0.9rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .terms dt { font-weight: 700; }
+  .terms dd,
+  .rows dd { margin: 0.2rem 0 0; }
+  .rows dt {
+    color: var(--muted);
+    font-size: var(--step--1);
+  }
+
+  /* Wiersze „etykieta – wartość” (narzędzia, dane firmy). */
+  @media (min-width: 40rem) {
+    .rows > div {
+      display: grid;
+      grid-template-columns: 12rem minmax(0, 1fr);
+      gap: 1.5rem;
+      align-items: baseline;
+    }
+    .rows dd { margin: 0; }
+  }
+
+  /* Realizacje: lista z liniami zamiast siatki kart. */
+  .work {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-m) 0;
+    border-top: 1px solid var(--line);
+  }
+  .work > li {
+    padding-block: 1.25rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .work h3 {
+    font-size: var(--step-2);
+    margin-bottom: 0.15rem;
+  }
+  .work__sector {
+    color: var(--muted);
+    font-size: var(--step--1);
+    margin-bottom: 0.6rem;
+  }
+  .work__summary { margin-bottom: 0.5rem; }
+  .work__scope {
+    list-style-type: disc;
+    margin: 0 0 0.75rem;
+    padding-left: 1.1em;
+  }
+  .work__scope li { margin-bottom: 0.2rem; }
+  .work__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.5rem;
+    margin: 0;
+  }
+  .work__links a {
+    display: inline-block;
+    padding-block: 0.1rem;
+  }
+
+  .company { margin-top: var(--space-m); }
+
+  /* Opinie w tym samym układzie co reszta sekcji: nagłówek po lewej, cytaty po prawej. */
+  @media (min-width: 64rem) {
+    .testimonials-split :global(.testimonials) {
+      display: grid;
+      grid-template-columns: 18rem minmax(0, 1fr);
+      gap: 0 4rem;
+    }
+    .testimonials-split :global(.testimonials > h2) { margin-bottom: 0; }
+  }
+
+  .contact { padding-bottom: 0; }
+  .contact .actions { margin-top: var(--space-m); }
+  .profiles__intro { margin: var(--space-m) 0 0.25rem; }
+  .profiles {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.5rem;
+  }
+  .profiles a { display: inline-block; padding-block: 0.25rem; }
+</style>

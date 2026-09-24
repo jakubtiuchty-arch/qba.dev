@@ -1,0 +1,93 @@
+---
+// Strona po nieudanym wysłaniu formularza bez JavaScriptu (api/contact.js odsyła tu 303
+// przy błędach walidacji, limicie wysyłek i błędzie wysyłki).
+import Base from '../../layouts/Base.astro';
+import { site } from '../../data/site';
+
+const { contact } = site;
+
+const title = `Wiadomość nie została wysłana | ${site.brand}`;
+const description = `Formularz na ${site.brand} nie przyjął wiadomości. Zadzwoń: ${contact.phone} albo napisz na ${contact.email}. ${contact.responseTime}`;
+---
+
+<Base title={title} description={description} noindex>
+  <section class="section result" aria-labelledby="wynik-tytul">
+    <div class="container">
+      <h1 id="wynik-tytul">Wiadomość nie została wysłana</h1>
+      <p class="lead">
+        Możliwe powody: puste wymagane pole, błędny adres e-mail lub numer telefonu, kilka prób w&nbsp;ciągu minuty albo
+        chwilowa awaria formularza.
+      </p>
+      <!-- Link „Wróć do formularza” to nowe żądanie, więc formularz otwiera się pusty. Mówię o tym wprost. -->
+      <p class="result__text">
+        Przycisk „Wstecz” w&nbsp;przeglądarce zwykle przywraca formularz z&nbsp;wpisanym tekstem. Przycisk „Wróć do
+        formularza” otwiera go pusty.
+        Opis możesz też wysłać e-mailem na <a href={`mailto:${contact.email}`}>{contact.email}</a>. {contact.responseTime}
+      </p>
+
+      <dl class="facts result__facts">
+        <div>
+          <dt>Telefon</dt>
+          <dd>
+            <a href={contact.phoneHref} class="nowrap"><span class="visually-hidden">Zadzwoń: </span>{contact.phone}</a>
+          </dd>
+        </div>
+        <div>
+          <dt>E-mail</dt>
+          <dd><a href={`mailto:${contact.email}`}>{contact.email}</a></dd>
+        </div>
+        <div>
+          <dt>Godziny pracy</dt>
+          <dd>{contact.hours}</dd>
+        </div>
+      </dl>
+
+      <div class="actions">
+        <a class="btn" href="/kontakt/#formularz">Wróć do formularza</a>
+        <a class="btn btn--outline" href={contact.phoneHref}>Zadzwoń: {contact.phone}</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .result {
+    padding-top: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+  }
+  .result h1 {
+    font-size: var(--step-3);
+    max-width: 20ch;
+    margin-bottom: 1.25rem;
+  }
+  .result .lead {
+    margin-bottom: 0.75rem;
+  }
+  .result__text {
+    max-width: var(--measure);
+    margin-bottom: var(--space-l);
+  }
+  /* Te same wiersze faktów co na /kontakt/: kolumna etykiet 8,5rem. */
+  .result__facts {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 32rem;
+    margin-bottom: var(--space-l);
+  }
+  .result__facts > div {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: baseline;
+  }
+  .result__facts dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .result__facts dd a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+  }
+  .nowrap {
+    white-space: nowrap;
+  }
+</style>

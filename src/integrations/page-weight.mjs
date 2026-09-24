@@ -84,7 +84,13 @@ function glueOrphans(html) {
     if (skipUntil || !part.trim()) continue;
     const re = /(^|[\s\u00a0(„"])([aiouwzAIOUWZ]) +(?=\S)/g;
     // Dwa przebiegi: łapiemy też sąsiadujące jednoliterowe słowa („a w razie”).
-    parts[i] = part.replace(re, '$1$2\u00a0').replace(re, '$1$2\u00a0');
+    parts[i] = part
+      .replace(re, '$1$2\u00a0')
+      .replace(re, '$1$2\u00a0')
+      // Liczba nie odrywa się od jednostki („7 dni”, „24 godzin”, „30 minut”, „2 500 zł”).
+      .replace(/(\d) (?=[\p{L}%])/gu, '$1\u00a0')
+      // Grupy cyfr numeru telefonu zostają w jednym wierszu („726 151 515”).
+      .replace(/\b(\d{3}) (?=\d{3}\b)/g, '$1\u00a0');
   }
   return parts.join('');
 }

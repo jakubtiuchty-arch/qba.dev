@@ -31,7 +31,7 @@
   --space-section: clamp(3.5rem, 2.5rem + 5vw, 7rem);
 
   --radius: 6px;
-  --measure: 66ch;
+  --measure: 30em; /* ok. 65 znaków w wierszu w Atkinson Hyperlegible Next */
   --container: 74rem;
 }
 
@@ -103,11 +103,11 @@ strong { font-weight: 700; }
 .prose > :last-child { margin-bottom: 0; }
 
 .section { padding-block: var(--space-section); }
-.section + .section { border-top: 1px solid var(--line); }
-.section--surface { background: var(--surface); border-top: 0; }
-.section--surface + .section { border-top: 0; }
+/* Linia tylko między dwiema sekcjami na tle --paper; zmiana tła wystarcza jako podział. */
+.section:not(.section--surface) + .section:not(.section--surface) { border-top: 1px solid var(--line); }
+.section--surface { background: var(--surface); }
 
-.lead { font-size: var(--step-1); line-height: 1.5; color: var(--ink); max-width: 60ch; }
+.lead { font-size: var(--step-1); line-height: 1.5; color: var(--ink); max-width: 30em; }
 .muted { color: var(--muted); }
 .small { font-size: var(--step--1); }
 
@@ -193,3 +193,6 @@ strong { font-weight: 700; }
 @media (prefers-reduced-motion: no-preference) {
   @view-transition { navigation: auto; }
 }
+
+/* Gdy ostatnia sekcja ma tło --surface, stopka (też --surface) dochodzi do niej bez pasa tła. */
+main:has(> .section--surface:last-child) + .site-footer { margin-top: 0; }

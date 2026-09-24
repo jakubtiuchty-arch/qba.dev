@@ -1,0 +1,193 @@
+---
+// Jeden pakiet na /oferta/: nazwa, dla kogo, cena, pełna lista i dodatki w tabeli.
+// Wszystko z pricing.packages (src/data/site.ts). Bez wyróżniania „najlepszego” pakietu.
+import type { pricing } from '../../data/site';
+import { formatPLN, gross } from '../../data/site';
+import { isNet, priceMain, priceGross, tie, NBSP } from '../../data/format';
+
+type Package = (typeof pricing.packages)[number];
+
+interface Props {
+  pkg: Package;
+}
+
+const { pkg } = Astro.props;
+const headingId = `pakiet-${pkg.id}-nazwa`;
+const listId = `pakiet-${pkg.id}-lista`;
+const grossPrice = priceGross(pkg.price);
+
+const addons = pkg.addons.map((addon) => ({
+  name: addon.name,
+  price: addon.price,
+  monthly: 'monthly' in addon && addon.monthly === true,
+}));
+---
+
+<article class="package" id={`pakiet-${pkg.id}`} aria-labelledby={headingId}>
+  <div class="package__head">
+    <h3 id={headingId} class="package__name">{pkg.name}</h3>
+    <p class="package__for">{tie(pkg.for)}</p>
+  </div>
+
+  <p class="package__price">
+    <span class="package__from">od {priceMain(pkg.price)}</span>{' '}
+    {grossPrice && <span class="package__gross">({grossPrice})</span>}
+  </p>
+
+  <div class="package__includes">
+    <h4 id={listId} class="package__label">W pakiecie</h4>
+    <ul class="checklist" role="list" aria-labelledby={listId}>
+      {pkg.includes.map((item) => <li>{tie(item)}</li>)}
+    </ul>
+  </div>
+
+  {
+    addons.length > 0 ? (
+      <table class="addons">
+        <caption>
+          Dodatki<span class="visually-hidden"> do pakietu {pkg.name}</span>
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Dodatek</th>
+            {isNet ? (
+              <>
+                <th scope="col" class="num">Netto</th>
+                <th scope="col" class="num">Brutto</th>
+              </>
+            ) : (
+              <th scope="col" class="num">Cena brutto</th>
+            )}
+          </tr>
+        </thead>
+        <tbody>
+          {addons.map((addon) => (
+            <tr>
+              <th scope="row">
+                {addon.name}
+                {addon.monthly && (
+                  <>
+                    {' '}
+                    <span class="per">opłata miesięczna</span>
+                  </>
+                )}
+              </th>
+              <td class="num amount">{formatPLN(addon.price)}</td>
+              {isNet && <td class="num amount">{formatPLN(gross(addon.price))}</td>}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    ) : (
+      <div />
+    )
+  }
+
+  <p class="package__action">
+    <a class="btn btn--outline" href={`/kontakt/?pakiet=${encodeURIComponent(pkg.id)}#formularz`}>
+      Zapytaj o{NBSP}pakiet {pkg.name}
+    </a>
+  </p>
+</article>
+
+<style>
+  /* Na telefonie pakiety leżą jeden pod drugim, oddzielone linią.
+     Na szerokim ekranie stają obok siebie; wiersze (nazwa, cena, lista, dodatki, przycisk)
+     są wyrównane między kolumnami dzięki subgrid w .packages (strona oferta.astro). */
+  .package {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-width: 40rem;
+    padding-block: var(--space-l);
+  }
+  .package > * { margin: 0; }
+
+  .package__name {
+    font-size: var(--step-2);
+    margin-bottom: 0.3rem;
+  }
+  .package__for {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .package__from {
+    display: block;
+    font-size: var(--step-1);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .package__gross {
+    display: block;
+    color: var(--muted);
+  }
+
+  .package__label {
+    font-family: var(--font-body);
+    font-size: var(--step--1);
+    font-weight: 700;
+    margin: 0 0 0.6rem;
+  }
+  .package__includes .checklist { margin: 0; }
+  .package__includes .checklist li:last-child { margin-bottom: 0; }
+
+  .addons {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+    line-height: 1.4;
+  }
+  .addons caption {
+    text-align: left;
+    font-weight: 700;
+    padding-bottom: 0.6rem;
+  }
+  .addons th,
+  .addons td {
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+  .addons thead th {
+    padding-top: 0;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .addons tbody th { font-weight: 400; }
+  .addons .num {
+    text-align: right;
+    padding-left: 1rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .amount { white-space: nowrap; }
+  .per {
+    display: block;
+    color: var(--muted);
+  }
+
+  .package__action { padding-top: 0.25rem; }
+
+  .package + .package { border-top: 1px solid var(--line); }
+
+  @media (min-width: 64rem) {
+    .package {
+      display: grid;
+      grid-row: span 5;
+      grid-template-rows: subgrid;
+      row-gap: 1.25rem;
+      max-width: none;
+      padding: var(--space-m) 1.75rem 0;
+    }
+    .package:first-child { padding-left: 0; }
+    .package:last-child { padding-right: 0; }
+    .package + .package {
+      border-top: 0;
+      border-left: 1px solid var(--line);
+    }
+    /* Tabela z mniejszą liczbą dodatków nie rozciąga wierszy do wysokości sąsiednich kolumn. */
+    .addons { align-self: start; }
+    .package__action { align-self: end; }
+  }
+</style>

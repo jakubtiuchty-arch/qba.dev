@@ -1,0 +1,99 @@
+---
+import Base from '../../layouts/Base.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import ProjectsContact from '../../components/projects/ProjectsContact.astro';
+import { site } from '../../data/site';
+import { projects } from '../../data/projects';
+
+// „A, B, C i D”
+const joinPl = (items: string[]) =>
+  items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} i ${items[items.length - 1]}`;
+
+const title = `Realizacje – strony i systemy dla firm | ${site.brand}`;
+
+// Opis dla wyszukiwarki (120–160 znaków). Po dodaniu kolejnych realizacji lista nazw przestanie się mieścić,
+// wtedy zostaje wersja bez nazw.
+const DESC_MIN = 120;
+const DESC_MAX = 160;
+const shortDescription =
+  'Strony i systemy, które zbudowałem dla firm. Przy każdej realizacji: klient, cel, zakres prac i link do działającej strony.';
+const withNames = `Strony i systemy, które zbudowałem dla firm: ${joinPl(projects.map((p) => p.name))}. Zakres prac i linki do działających stron.`;
+const description = withNames.length >= DESC_MIN && withNames.length <= DESC_MAX ? withNames : shortDescription;
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Strona główna', item: `${site.url}/` },
+      { '@type': 'ListItem', position: 2, name: 'Realizacje', item: `${site.url}/realizacje/` },
+    ],
+  },
+];
+---
+
+<Base title={title} description={description} jsonLd={jsonLd}>
+  <section class="section page" aria-labelledby="realizacje-tytul">
+    <div class="container">
+      <h1 id="realizacje-tytul">Realizacje</h1>
+      <p class="lead">
+        Strony i&nbsp;systemy, które zbudowałem dla firm. Przy każdej realizacji jest link do działającej
+        strony&nbsp;– możesz ją otworzyć i&nbsp;przejrzeć.
+      </p>
+
+      <ul class="projects" role="list">
+        {
+          projects.map((project, index) => (
+            <li class="projects__item">
+              <ProjectCard project={project} headingLevel={2} eager={index === 0} />
+              <p class="projects__site">
+                <a href={project.url}>Zobacz stronę {project.domain}</a>
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <ProjectsContact />
+</Base>
+
+<style>
+  .page {
+    padding-top: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+  }
+  /* Długość wiersza: globalne 60ch daje w tym kroju ok. 89 znaków; 30em przy --step-1 to ok. 66. */
+  .page .lead {
+    max-width: 30em;
+    margin-bottom: clamp(2.5rem, 1.75rem + 3vw, 4.5rem);
+  }
+
+  .projects {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: clamp(3rem, 2rem + 3vw, 5rem) 2rem;
+  }
+  .projects__item {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .projects__site {
+    margin: 0.75rem 0 0;
+    font-weight: 700;
+  }
+  .projects__site a {
+    display: inline-block;
+    min-height: 1.5rem;
+    overflow-wrap: anywhere;
+  }
+
+  @media (min-width: 48rem) {
+    .projects {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

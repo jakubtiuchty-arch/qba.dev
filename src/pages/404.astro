@@ -1,0 +1,120 @@
+---
+import Base from '../layouts/Base.astro';
+import { site, pricing } from '../data/site';
+import { projects } from '../data/projects';
+import { priceText } from '../data/format';
+
+const { contact } = site;
+
+const title = `Nie ma takiej strony | ${site.brand}`;
+const description = `Pod tym adresem nie ma strony. Przejdź do realizacji, oferty i cen albo kontaktu. Możesz też zadzwonić: ${contact.phone} (${contact.hours}).`;
+
+// Najniższa cena pakietu z site.ts, w formacie „od 2 500 zł netto (3 075 zł brutto)”.
+const minPrice = Math.min(...pricing.packages.map((p) => p.price));
+
+// `names` to nazwy realizacji z projects.ts; każda w całości w jednym wierszu (np. „Serwis-Zebry.pl”).
+const links: { href: string; label: string; names?: string[]; note?: string }[] = [
+  { href: '/', label: 'Przejdź na stronę główną' },
+  {
+    href: '/realizacje/',
+    label: 'Zobacz realizacje',
+    names: projects.map((p) => p.name),
+    note: 'co zrobiłem i linki do stron',
+  },
+  { href: '/oferta/', label: 'Zobacz ofertę i ceny', note: `pakiety od ${priceText(minPrice)}` },
+  { href: '/kontakt/', label: 'Opisz swój projekt', note: 'formularz kontaktowy, e-mail i telefon' },
+];
+
+// Separator przed nazwą: „, ” albo „ i ” przed ostatnią (z twardą spacją po „i”).
+const sep = (i: number, count: number) => (i === 0 ? '' : i === count - 1 ? ' i\u00a0' : ', ');
+---
+
+<Base title={title} description={description} noindex>
+  <section class="section notfound" aria-labelledby="blad-tytul">
+    <div class="container">
+      <h1 id="blad-tytul">Nie ma takiej strony</h1>
+      <p class="lead">
+        Możliwe, że link jest nieaktualny albo w&nbsp;adresie jest literówka. Sprawdź adres albo wybierz jedną ze
+        stron poniżej.
+      </p>
+
+      <nav class="notfound__nav" aria-label="Przydatne strony">
+        <ul>
+          {
+            links.map((link) => (
+              <li>
+                <a href={link.href}>{link.label}</a>
+                {link.note && (
+                  <span class="muted">
+                    &nbsp;–{' '}
+                    {link.names?.map((name, i, all) => (
+                      <Fragment>
+                        {sep(i, all.length)}
+                        <span class="nowrap">{name}</span>
+                      </Fragment>
+                    ))}
+                    {link.names && ': '}
+                    {link.note}
+                  </span>
+                )}
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <p class="notfound__call">
+        Jeśli nie ma tu tego, czego szukasz, zadzwoń albo napisz. Telefon odbieram <span class="nowrap">{contact.hours}</span>. {contact.responseTime}
+      </p>
+      <div class="actions">
+        <a class="btn" href={contact.phoneHref}>Zadzwoń: {contact.phone}</a>
+        <a class="btn btn--outline" href={`mailto:${contact.email}`}>Napisz: {contact.email}</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .notfound {
+    padding-top: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+    padding-bottom: 0;
+    /* --measure (66ch) daje w tym foncie ok. 100 znaków w wierszu; 42ch to ok. 66 znaków. */
+    --text-measure: 42ch;
+  }
+  .notfound h1 {
+    margin-bottom: 0.4em;
+  }
+  .notfound .lead {
+    max-width: 38ch;
+    margin-bottom: var(--space-l);
+  }
+
+  .notfound__nav {
+    max-width: var(--text-measure);
+  }
+  .notfound__nav ul {
+    list-style: none;
+    margin: 0 0 var(--space-l);
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .notfound__nav li {
+    padding-block: 0.85rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .notfound__nav a {
+    display: inline-block;
+    min-height: 1.5rem;
+    font-weight: 700;
+  }
+
+  .notfound__call {
+    max-width: var(--text-measure);
+  }
+  .actions a {
+    overflow-wrap: anywhere;
+  }
+  .nowrap {
+    white-space: nowrap;
+  }
+</style>

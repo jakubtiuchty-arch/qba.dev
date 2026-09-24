@@ -1,0 +1,567 @@
+---
+import Base from '../layouts/Base.astro';
+import OfferPackage from '../components/offer/OfferPackage.astro';
+import { site, pricing, process as steps, guarantees } from '../data/site';
+import {
+  isNet,
+  vatPercent,
+  priceMain,
+  priceGross,
+  priceText,
+  tie,
+  joinPl,
+  lowerFirst,
+  upperFirst,
+  NBSP,
+} from '../data/format';
+
+const { contact, company, area } = site;
+const packages = pricing.packages;
+const [firstPackage] = packages;
+
+const minPrice = Math.min(...packages.map((p) => p.price));
+const supportDays = packages.map((p) => p.support);
+const minSupport = Math.min(...supportDays);
+const maxSupport = Math.max(...supportDays);
+
+// ---------------------------------------------------------------------------
+// Fakty z procesu i gwarancji (src/data/site.ts). Wyciągam je z tekstu danych,
+// żeby strona nie przepisywała ich na sztywno. Jeśli zdanie w danych się zmieni
+// i fakt przestanie pasować, dana pozycja po prostu się nie pokaże.
+// ---------------------------------------------------------------------------
+
+// Termin z gwarancji „7 dni roboczych albo zwrot zaliczki” → 7.
+const deadlineGuarantee = guarantees.find((g) => /^\d+ dni roboczych/.test(g.title));
+const deadlineDays = deadlineGuarantee ? Number(deadlineGuarantee.title.match(/^\d+/)?.[0]) : null;
+const deadline = deadlineDays ? `${deadlineDays}${NBSP}dni roboczych od otrzymania materiałów` : null;
+
+// Poprawki: „W cenie są dwie rundy poprawek.” → „dwie rundy poprawek”.
+const revisions = steps.map((s) => s.text.match(/(\p{L}+|\d+) rund\p{L}* poprawek/u)?.[0]).find(Boolean) ?? null;
+const revisionRounds = revisions ? revisions.replace(/ poprawek$/, '') : null; // „dwie rundy”
+
+// Krok „Kodowanie”: „…: wersja na telefon, formularze, dane dla Google.” → trzy pozycje.
+const codingStep = steps.find((s) => s.title === 'Kodowanie');
+const codingItems = codingStep?.text.split(': ')[1]?.replace(/\.$/, '').split(', ') ?? [];
+
+// Materiały od klienta: „…wysyłasz materiały: logo, teksty, zdjęcia.” → trzy pozycje.
+const materials = steps.map((s) => s.text.match(/materiały: ([^.]+)\./)?.[1]).find(Boolean)?.split(', ') ?? [];
+const materialsNote = tie(
+  deadlineDays
+    ? `Wysyłasz je po pierwszej rozmowie, a termin ${deadlineDays} dni roboczych liczę od dnia, w którym dostanę komplet.`
+    : 'Wysyłasz je po pierwszej rozmowie.',
+);
+
+// Krok „Publikacja”: „Pokazuję, jak z niej korzystać.”
+const showsHowToUse = steps.some((s) => s.text.includes('Pokazuję, jak'));
+
+// Gwarancja własności: pełne prawa do kodu, domena i hosting na klienta.
+const ownership = guarantees.find((g) => g.text.includes('prawa do kodu'))?.text ?? '';
+const fullRights = ownership.includes('pełne prawa do kodu');
+const domainOnClient = ownership.includes('Domena i hosting są zapisane na Ciebie');
+const domainPaidSeparately = pricing.note.includes('nie obejmują domeny i hostingu');
+
+// Wsparcie po publikacji: „14 dni w pakiecie Starter, 30 dni w pakiecie Pro i 60 dni w pakiecie Premium”.
+const supportByPackage = joinPl(packages.map((p) => `${p.support}${NBSP}dni w${NBSP}pakiecie ${p.name}`));
+// „14, 30 albo 60 dni”
+const supportOptions = `${joinPl(
+  [...new Set(supportDays)].sort((a, b) => a - b).map(String),
+  'albo',
+)}${NBSP}dni`;
+const supportRange =
+  minSupport === maxSupport ? `${minSupport}${NBSP}dni` : `${minSupport}–${maxSupport}${NBSP}dni, zależnie od pakietu`;
+
+// „W każdej stronie”: pozycje wspólne dla wszystkich pakietów oraz to, co proces i gwarancje
+// obiecują każdemu projektowi. Nic spoza danych.
+const commonIncludes = firstPackage.includes.filter((item) =>
+  packages.every((p) => (p.includes as readonly string[]).includes(item)),
+);
+const everyItems = [
+  ...commonIncludes,
+  codingItems.length > 0 && upperFirst(joinPl(codingItems)),
+  revisions && `${upperFirst(revisions)} projektu`,
+  `Wsparcie po publikacji: ${minSupport === maxSupport ? supportOptions : `${supportOptions}, zależnie od pakietu`}`,
+  showsHowToUse && 'Pokazuję, jak korzystać ze strony',
+  fullRights && 'Pełne prawa do kodu',
+  domainOnClient && `Domena i hosting zapisane na Ciebie${domainPaidSeparately ? ' (płacisz za nie osobno)' : ''}`,
+].filter((item): item is string => typeof item === 'string' && item.length > 0);
+
+// Dodatkowa podstrona: w których pakietach i za ile (z tabel dodatków).
+const extraPage = packages.flatMap((p) =>
+  p.addons.filter((a) => a.name === 'Dodatkowa podstrona').map((a) => ({ pkg: p.name, price: a.price })),
+);
+const extraPagePrices = [...new Set(extraPage.map((e) => e.price))];
+
+// Obsługa SEO: dodatek płatny co miesiąc; najniższa kwota ze wszystkich pakietów.
+const monthlyAddons = packages.flatMap((p) => p.addons.filter((a) => 'monthly' in a && a.monthly));
+const monthlyFrom = monthlyAddons.length > 0 ? Math.min(...monthlyAddons.map((a) => a.price)) : null;
+const monthlyNames = [...new Set(monthlyAddons.map((a) => a.name))];
+// „Dodatek „Obsługa SEO” jest” / „Dodatki „A” i „B” są”
+const monthlyLabel =
+  monthlyNames.length > 1
+    ? `Dodatki ${joinPl(monthlyNames.map((n) => `„${n}”`))} są`
+    : `Dodatek „${monthlyNames[0]}” jest`;
+
+// Wielkość strony w każdym pakiecie: pozycja listy, która mówi o podstronach albo sekcjach.
+const sizes = packages
+  .map((p) => ({ name: p.name, size: p.includes.find((i) => /podstron|sekcj/i.test(i)) as string | undefined }))
+  .filter((s): s is { name: (typeof packages)[number]['name']; size: string } => Boolean(s.size));
+
+// Samodzielna edycja treści (CMS) i sklep internetowy — tylko jeśli są w danych.
+const cms = packages
+  .flatMap((p) => p.includes.filter((i) => i.startsWith('CMS')).map((item) => ({ pkg: p, item })))
+  .at(0);
+const cmsEverywhere = cms ? packages.every((p) => p.includes.some((i) => i.startsWith('CMS'))) : false;
+const shop = packages
+  .flatMap((p) => p.addons.map((a) => ({ pkg: p, addon: a })))
+  .find(({ addon }) => addon.name === 'Sklep internetowy');
+
+const title = `Cennik stron od ${priceMain(minPrice)} – Trzebnica | ${site.brand}`;
+const description = `Pakiety stron dla firm z Trzebnicy i Wrocławia od ${priceMain(minPrice)}: co zawierają i ile kosztują dodatki.${
+  deadline ? ` Termin: ${deadline}.` : ''
+}`;
+
+const pageUrl = `${site.url}/oferta/`;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Strona główna', item: `${site.url}/` },
+      { '@type': 'ListItem', position: 2, name: 'Oferta i ceny', item: pageUrl },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    '@id': `${pageUrl}#usluga`,
+    name: 'Projektowanie i kodowanie stron internetowych',
+    serviceType: 'Strony internetowe dla firm',
+    description: 'Projektowanie i kodowanie stron internetowych dla firm z Trzebnicy, Wrocławia i okolic.',
+    url: pageUrl,
+    provider: { '@id': `${site.url}/#firma` },
+    areaServed: area.places.map((name) => ({ '@type': 'Place', name })),
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: 'Pakiety stron internetowych',
+      itemListElement: packages.map((p) => ({
+        '@type': 'Offer',
+        name: `Pakiet ${p.name}`,
+        description: p.for,
+        url: `${pageUrl}#pakiet-${p.id}`,
+        price: p.price,
+        priceCurrency: 'PLN',
+        priceSpecification: {
+          '@type': 'PriceSpecification',
+          price: p.price,
+          minPrice: p.price,
+          priceCurrency: 'PLN',
+          valueAddedTaxIncluded: !isNet,
+        },
+        itemOffered: {
+          '@type': 'Service',
+          name: `Strona internetowa – pakiet ${p.name}`,
+          description: p.includes.join('; '),
+        },
+      })),
+    },
+  },
+];
+---
+
+<Base title={title} description={description} jsonLd={jsonLd}>
+  <section class="section intro" aria-labelledby="oferta-tytul">
+    <div class="container">
+      <h1 id="oferta-tytul">Oferta i&nbsp;ceny</h1>
+      {
+        isNet ? (
+          <p class="lead">
+            Ceny podaję netto, a&nbsp;obok każdej kwotę brutto z&nbsp;VAT&nbsp;{vatPercent}%. Faktury wystawia{' '}
+            <span class="nowrap">{company.name}</span>, firma, którą prowadzę.
+          </p>
+        ) : (
+          <p class="lead">
+            Ceny podaję brutto, z&nbsp;VAT&nbsp;{vatPercent}%. Faktury wystawia <span class="nowrap">{company.name}</span>,
+            firma, którą prowadzę.
+          </p>
+        )
+      }
+
+      <dl class="facts intro__facts">
+        <div>
+          <dt>Ceny</dt>
+          <dd>od {priceText(minPrice)}</dd>
+        </div>
+        {
+          deadline && (
+            <div>
+              <dt>Termin</dt>
+              <dd>{deadline}</dd>
+            </div>
+          )
+        }
+        {
+          revisionRounds && (
+            <div>
+              <dt>Poprawki projektu</dt>
+              <dd>{tie(`${upperFirst(revisionRounds)} w cenie`)}</dd>
+            </div>
+          )
+        }
+        <div>
+          <dt>Wsparcie po publikacji</dt>
+          <dd>{supportRange}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section packages-section" id="pakiety" aria-labelledby="pakiety-tytul">
+    <div class="container">
+      <h2 id="pakiety-tytul">Pakiety</h2>
+      <div class="packages" style={`--count: ${packages.length}`}>
+        {packages.map((pkg) => <OfferPackage pkg={pkg} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--surface" aria-labelledby="w-kazdej-tytul">
+    <div class="container split">
+      <h2 id="w-kazdej-tytul">W&nbsp;każdej stronie</h2>
+      <div class="split__body">
+        <p>W&nbsp;każdym pakiecie, bez dopłat:</p>
+        <ul class="checklist every" role="list">
+          {everyItems.map((item) => <li>{tie(item)}</li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="cena" aria-labelledby="cena-tytul">
+    <div class="container split">
+      <h2 id="cena-tytul">Co wpływa na cenę</h2>
+      <div class="split__body">
+        <dl class="terms">
+          <div>
+            <dt>Wielkość strony</dt>
+            <dd>
+              {
+                sizes.length > 0 && (
+                  <ul class="sizes" role="list">
+                    {sizes.map((s) => (
+                      <li>
+                        {s.name}: {tie(lowerFirst(s.size))}
+                      </li>
+                    ))}
+                  </ul>
+                )
+              }
+              {
+                extraPage.length > 0 && extraPagePrices.length === 1 && (
+                  <p>
+                    Każda dodatkowa podstrona w&nbsp;{extraPage.length > 1 ? 'pakietach' : 'pakiecie'}{' '}
+                    {joinPl(extraPage.map((e) => e.pkg))} kosztuje {priceText(extraPagePrices[0])}.
+                  </p>
+                )
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Dodatki</dt>
+            <dd>
+              <p>
+                Cenę dodatku doliczam do ceny pakietu. Każdy pakiet ma własną listę:{' '}
+                <a href="#pakiety">zobacz dodatki i&nbsp;ich ceny przy pakietach</a>.
+              </p>
+              {
+                monthlyFrom !== null && (
+                  <p>
+                    {monthlyLabel} płatn{monthlyNames.length > 1 ? 'e' : 'y'} co miesiąc: od {priceText(monthlyFrom)},
+                    zależnie od pakietu.
+                  </p>
+                )
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Domena, hosting i&nbsp;funkcje spoza pakietów</dt>
+            <dd>
+              <p>{tie(pricing.note)}</p>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="wspolpraca-tytul">
+    <div class="container split">
+      <h2 id="wspolpraca-tytul">Jak wygląda współpraca</h2>
+      <div class="split__body">
+        <p>Pracuję sam, więc od pierwszego telefonu do publikacji i&nbsp;po niej rozmawiasz ze mną.</p>
+
+        <ol class="steps" role="list">
+          {
+            steps.map((step) => (
+              <li>
+                <p class="steps__when">{step.when}</p>
+                <div>
+                  <h3>{step.title}</h3>
+                  <p>{tie(step.text)}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+
+        <h3 class="guarantees__title" id="gwarancje">Gwarancje</h3>
+        <dl class="terms">
+          {
+            guarantees.map((g) => (
+              <div>
+                <dt>{tie(g.title)}</dt>
+                <dd>{tie(g.text)}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="pytania-tytul">
+    <div class="container split">
+      <h2 id="pytania-tytul">Pytania i&nbsp;odpowiedzi</h2>
+      <div class="split__body faq">
+        <details>
+          <summary>Czy ceny są netto, czy brutto?</summary>
+          <div class="faq__answer">
+            {
+              isNet ? (
+                <p>
+                  Netto. Do ceny dochodzi VAT&nbsp;{vatPercent}%, więc przy każdej kwocie podaję też cenę brutto.
+                  Na przykład pakiet {firstPackage.name} kosztuje od {priceMain(firstPackage.price)}, czyli od{' '}
+                  {priceGross(firstPackage.price)}.
+                </p>
+              ) : (
+                <p>Brutto, z&nbsp;VAT&nbsp;{vatPercent}%.</p>
+              )
+            }
+          </div>
+        </details>
+
+        <details>
+          <summary>Kto wystawia fakturę?</summary>
+          <div class="faq__answer">
+            <p>
+              {company.name}, firma, którą prowadzę (NIP&nbsp;{company.nip}). Pełne dane firmy są w&nbsp;stopce każdej
+              strony.
+            </p>
+          </div>
+        </details>
+
+        {
+          deadline && (
+            <details>
+              <summary>Ile trwa zrobienie strony?</summary>
+              <div class="faq__answer">
+                <p>
+                  {upperFirst(deadline)}. <a href="#gwarancje">Zobacz gwarancję terminu</a>.
+                </p>
+              </div>
+            </details>
+          )
+        }
+
+        {
+          materials.length > 0 && (
+            <details>
+              <summary>Co muszę przygotować?</summary>
+              <div class="faq__answer">
+                <p>
+                  {upperFirst(joinPl(materials))}. {materialsNote}
+                </p>
+              </div>
+            </details>
+          )
+        }
+
+        <details>
+          <summary>Ile trwa wsparcie po publikacji?</summary>
+          <div class="faq__answer">
+            <p>{upperFirst(supportByPackage)}.</p>
+          </div>
+        </details>
+
+        {
+          cms && (
+            <details>
+              <summary>Czy mogę samodzielnie zmieniać treści na stronie?</summary>
+              <div class="faq__answer">
+                <p>
+                  Tak, w&nbsp;pakiecie {cms.pkg.name}: jest w&nbsp;nim {tie(cms.item)}.
+                  {!cmsEverywhere && tie(' W innym pakiecie wycenię to osobno.')}
+                </p>
+              </div>
+            </details>
+          )
+        }
+
+        {
+          shop && (
+            <details>
+              <summary>Czy robisz sklepy internetowe?</summary>
+              <div class="faq__answer">
+                <p>
+                  Tak. Sklep internetowy to dodatek do pakietu {shop.pkg.name} za {priceText(shop.addon.price)}.
+                  Razem z&nbsp;pakietem kosztuje od {priceText(shop.pkg.price + shop.addon.price)}.
+                </p>
+              </div>
+            </details>
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section contact" aria-labelledby="kontakt-tytul">
+    <div class="container split">
+      <h2 id="kontakt-tytul">Zapytaj o&nbsp;wycenę</h2>
+      <div class="split__body">
+        <p>
+          Godziny: {contact.hours}. E-mail: <a href={`mailto:${contact.email}`}>{contact.email}</a>.{' '}
+          {tie(contact.responseTime)}
+        </p>
+        <div class="actions">
+          <a class="btn" href="/kontakt/">Opisz swój projekt</a>
+          <a class="btn btn--outline nowrap" href={contact.phoneHref}>Zadzwoń: {contact.phone}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nowrap { white-space: nowrap; }
+
+  /* Długość wiersza: --measure (66ch) daje w tym kroju ok. 95 znaków, a zasada to ok. 66.
+     30em to ok. 65 znaków przy średniej szerokości polskiej litery w Atkinson Hyperlegible Next. */
+  .intro { padding-bottom: var(--space-l); }
+  .intro h1 { margin-bottom: 0.4em; }
+  .intro .lead { max-width: 30em; }
+  .intro__facts { margin-top: var(--space-l); }
+
+  .packages-section h2 { margin-bottom: 0; }
+
+  /* Pakiety: na telefonie jeden pod drugim, na komputerze w kolumnach oddzielonych linią.
+     Wiersze pakietów wyrównuje subgrid (styl w OfferPackage.astro). */
+  .packages { display: grid; }
+
+  @media (min-width: 64rem) {
+    .packages-section h2 { margin-bottom: var(--space-m); }
+    .packages {
+      grid-template-columns: repeat(var(--count, 3), minmax(0, 1fr));
+      border-top: 1px solid var(--line);
+    }
+  }
+
+  /* Sekcje: na szerokim ekranie nagłówek po lewej, treść po prawej. */
+  .split {
+    display: grid;
+    gap: 0 4rem;
+  }
+  .split__body { max-width: 30em; }
+  .split__body > :last-child { margin-bottom: 0; }
+
+  @media (min-width: 64rem) {
+    .split { grid-template-columns: 18rem minmax(0, 1fr); }
+    .split > h2 { margin-bottom: 0; }
+  }
+
+  .every { margin-top: var(--space-m); }
+  .every li { margin-bottom: 0.65em; text-wrap: pretty; }
+
+  /* „Co wpływa na cenę” i gwarancje: wiersze oddzielone linią. */
+  .terms {
+    margin: 0 0 1em;
+    border-top: 1px solid var(--line);
+  }
+  .terms > div {
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .terms dt { font-weight: 700; }
+  .terms dd { margin: 0.25rem 0 0; }
+  .terms dd > :last-child { margin-bottom: 0; }
+  .terms dd p { margin-bottom: 0.6em; }
+
+  .sizes {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0.6em;
+  }
+  .sizes li { margin-bottom: 0.2em; }
+
+  /* Kroki: prawdziwa kolejność, więc <ol>. Etykieta dnia zamiast numeru. */
+  .steps {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-m) 0 var(--space-l);
+    border-top: 1px solid var(--line);
+  }
+  .steps li {
+    display: grid;
+    gap: 0.15rem 1.5rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .steps__when {
+    margin: 0;
+    color: var(--muted);
+    font-size: var(--step--1);
+  }
+  .steps h3 {
+    font-size: var(--step-1);
+    margin-bottom: 0.2rem;
+  }
+  .steps li p:last-child { margin-bottom: 0; }
+
+  @media (min-width: 40rem) {
+    .steps li { grid-template-columns: 6.5rem minmax(0, 1fr); }
+    .steps__when { padding-top: 0.2rem; }
+  }
+
+  .guarantees__title { font-size: var(--step-1); }
+
+  /* Pytania i odpowiedzi: natywne <details>, działa bez JavaScriptu i z klawiatury. */
+  .faq { border-top: 1px solid var(--line); }
+  .faq details { border-bottom: 1px solid var(--line); }
+  .faq summary {
+    position: relative;
+    display: block;
+    padding: 0.9rem 2.75rem 0.9rem 0;
+    font-weight: 700;
+    line-height: 1.4;
+    cursor: pointer;
+    list-style: none;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary:hover { color: var(--accent-strong); }
+  /* Plus zamienia się w minus po rozwinięciu. Rysowany liniami, bez znaków do odczytania. */
+  .faq summary::before,
+  .faq summary::after {
+    content: '';
+    position: absolute;
+    right: 0.5rem;
+    top: calc(0.9rem + 0.7em);
+    width: 0.9rem;
+    height: 2px;
+    background: var(--accent);
+  }
+  .faq summary::after { transform: rotate(90deg); }
+  .faq details[open] > summary::after { display: none; }
+  .faq__answer { padding-bottom: 1rem; }
+  .faq__answer p:last-child { margin-bottom: 0; }
+
+  .contact { padding-bottom: 0; }
+  .contact .actions { margin-top: var(--space-m); }
+</style>

@@ -1,0 +1,87 @@
+---
+// Kontakt na końcu stron z realizacjami.
+// Wszystkie fakty z site.ts: jak wygląda współpraca (brief §2), cena najtańszego pakietu,
+// e-mail, godziny i czas odpowiedzi. Telefon jest w przycisku (i w stopce), więc nie powtarzamy go w liście.
+import { site, pricing } from '../../data/site';
+import { priceText, tie } from '../../data/format';
+
+interface Props {
+  heading?: string;
+  headingId?: string;
+}
+
+const { heading = 'Zadzwoń albo napisz', headingId = 'kontakt' } = Astro.props;
+const { contact } = site;
+const minPrice = Math.min(...pricing.packages.map((p) => p.price));
+---
+
+<section class="section contact" aria-labelledby={headingId}>
+  <div class="container contact__grid">
+    <div class="contact__text">
+      <h2 id={headingId}>{heading}</h2>
+      <p>
+        Rozmawiasz bezpośrednio ze mną&nbsp;– od pierwszego telefonu do publikacji i&nbsp;po niej.
+        Pakiety kosztują od&nbsp;{priceText(minPrice)}. To, czego nie ma w&nbsp;pakietach, wyceniam osobno.
+      </p>
+      <div class="actions">
+        <a class="btn" href="/kontakt/">Opisz swój projekt</a>
+        <a class="btn btn--outline nowrap" href={contact.phoneHref}>Zadzwoń: {contact.phone}</a>
+      </div>
+    </div>
+
+    <dl class="facts contact__facts">
+      <div>
+        <dt>E-mail</dt>
+        <dd><a href={`mailto:${contact.email}`}>{contact.email}</a></dd>
+      </div>
+      <div>
+        <dt>Godziny</dt>
+        <dd>{contact.hours}</dd>
+      </div>
+      <div>
+        <dt>Czas odpowiedzi</dt>
+        <dd>{tie(contact.responseTime)}</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<style>
+  .contact__grid {
+    display: grid;
+    gap: var(--space-l) 3rem;
+    align-items: start;
+  }
+  /* 46ch w tym kroju to ok. 66 znaków w wierszu. */
+  .contact__text p {
+    max-width: 46ch;
+    margin-bottom: 1.5rem;
+  }
+  .contact__facts dd a {
+    display: inline-block;
+    min-height: 1.5rem;
+    overflow-wrap: anywhere;
+  }
+  .nowrap {
+    white-space: nowrap;
+  }
+  @media (min-width: 30rem) {
+    .contact__facts {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .contact__facts > div {
+      display: grid;
+      grid-template-columns: 9.5rem minmax(0, 1fr);
+      gap: 1rem;
+      align-items: baseline;
+    }
+    .contact__facts dd {
+      margin: 0;
+    }
+  }
+  @media (min-width: 56rem) {
+    .contact__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    }
+  }
+</style>

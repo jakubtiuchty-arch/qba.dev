@@ -20,7 +20,7 @@ export const site = {
     phone: '726 151 515',
     phoneHref: 'tel:+48726151515',
     phoneE164: '+48726151515',
-    hours: 'pn–pt, 9:00–17:00',
+    hours: 'pn.–pt., 9:00–17:00',
     responseTime: 'Odpowiadam w ciągu 24 godzin w dni robocze.',
   },
   area: {
@@ -60,7 +60,7 @@ export const pricing = {
       price: 2500,
       support: 14,
       includes: [
-        'Strona jednostronicowa (jedna podstrona z sekcjami)',
+        'Jedna strona podzielona na sekcje',
         'Wersja na telefon, tablet i komputer',
         'Formularz kontaktowy',
         'Podstawowe SEO: tytuły, opisy, dane dla Google, mapa strony',
@@ -102,6 +102,9 @@ export const pricing = {
       includes: [
         'Do 5 podstron',
         'Projekt graficzny od zera',
+        'Wersja na telefon, tablet i komputer',
+        'Formularz kontaktowy',
+        'SEO: tytuły, opisy, dane dla Google, mapa strony',
         'CMS, czyli samodzielna edycja treści',
         'Integracje z CRM i systemem mailingowym',
         'Rozbudowane animacje',
@@ -122,7 +125,7 @@ export const process = [
   {
     when: 'Dzień 1',
     title: 'Rozmowa',
-    text: '30 minut rozmowy o firmie, klientach i celu strony. Po rozmowie wysyłasz materiały: logo, teksty, zdjęcia.',
+    text: '30 minut rozmowy o firmie, klientach i celu strony. Tego dnia wysyłasz materiały: logo, teksty, zdjęcia.',
   },
   {
     when: 'Dni 2–3',

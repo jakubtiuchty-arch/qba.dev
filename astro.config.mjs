@@ -11,5 +11,11 @@ export default defineConfig({
     format: 'directory',
     inlineStylesheets: 'auto',
   },
-  integrations: [sitemap(), pageWeight()],
+  integrations: [
+    sitemap({
+      // Strony z noindex nie trafiają do mapy strony.
+      filter: (page) => !/\/(kontakt\/(wyslano|blad)|404)\/?$/.test(page),
+    }),
+    pageWeight(),
+  ],
 });

@@ -8,9 +8,16 @@ interface Props {
   headingLevel?: 2 | 3;
   /** true dla pierwszego obrazka na ekranie (bez leniwego ładowania). */
   eager?: boolean;
+  /** Szerokość karty w układzie strony (domyślnie: siatka 2 kolumn od 48rem). */
+  sizes?: string;
 }
 
-const { project, headingLevel = 3, eager = false } = Astro.props;
+const {
+  project,
+  headingLevel = 3,
+  eager = false,
+  sizes = '(min-width: 76rem) 36rem, (min-width: 48rem) calc(50vw - 2rem), calc(100vw - 2rem)',
+} = Astro.props;
 const Heading = `h${headingLevel}` as 'h2' | 'h3';
 ---
 
@@ -22,7 +29,7 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3';
       formats={['avif', 'webp']}
       fallbackFormat="jpg"
       widths={[480, 800, 1200]}
-      sizes="(min-width: 60rem) 36rem, 100vw"
+      sizes={sizes}
       loading={eager ? 'eager' : 'lazy'}
       fetchpriority={eager ? 'high' : undefined}
     />

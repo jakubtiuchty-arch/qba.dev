@@ -1,0 +1,513 @@
+---
+// Formularz kontaktowy.
+// Bez JavaScriptu: zwykły POST na /api/contact/, a funkcja odsyła 303 na /kontakt/wyslano/ albo /kontakt/blad/.
+// Wtedy pola sprawdza przeglądarka (required, type, pattern) według tych samych zasad co serwer.
+// Z JavaScriptem: skrypt niżej sprawdza pola, wysyła JSON i pokazuje wynik w regionie statusu.
+// Opcje „Pakiet lub budżet” i kwoty pochodzą z src/data/site.ts; te same wartości sprawdza api/contact.js.
+import { site, pricing, formatPLN } from '../data/site';
+
+interface Props {
+  /** id nagłówka, który nazywa formularz dla czytników ekranu. */
+  labelledBy?: string;
+}
+
+const { labelledBy } = Astro.props;
+const { contact, company } = site;
+
+const NBSP = ' ';
+const unit = pricing.pricesAreNet ? 'netto' : 'brutto';
+
+// Opcje są krótkie, żeby mieściły się w zamkniętej liście na wąskim telefonie; VAT opisuje podpowiedź.
+// „Spoza pakietów” odpowiada zdaniu z pricing.note („wycenię to osobno”). Najdłuższa opcja ma ok. 270 px,
+// a zamknięta lista na ekranie 360 px mieści 274 px tekstu — dłuższe etykiety zostaną ucięte.
+const budgetOptions = [
+  ...pricing.packages.map((p) => ({ value: p.id, label: `${p.name} – od ${formatPLN(p.price)}${NBSP}${unit}` })),
+  { value: 'custom', label: 'Spoza pakietów – wycenię osobno' },
+  { value: 'unknown', label: 'Jeszcze nie wiem' },
+];
+const vatNote = pricing.pricesAreNet
+  ? `Kwoty netto, do faktury dochodzi ${Math.round(pricing.vatRate * 100)}% VAT.`
+  : '';
+---
+
+<form
+  class="cf"
+  action="/api/contact/"
+  method="post"
+  aria-labelledby={labelledBy}
+  data-contact-form
+  data-phone={contact.phone}
+  data-phone-href={contact.phoneHref}
+  data-email={contact.email}
+  data-response={contact.responseTime}
+>
+  <p class="cf__note">Pola z&nbsp;dopiskiem „wymagane” trzeba wypełnić.</p>
+
+  <div class="cf__field">
+    <label class="cf__label" for="kf-name">Imię i&nbsp;nazwisko <span class="cf__req">(wymagane)</span></label>
+    <input
+      class="cf__input"
+      id="kf-name"
+      name="name"
+      type="text"
+      autocomplete="name"
+      maxlength="100"
+      required
+      pattern=".*\S.*"
+      aria-describedby="kf-name-error"
+    />
+    <p class="cf__error" id="kf-name-error"></p>
+  </div>
+
+  <div class="cf__field">
+    <label class="cf__label" for="kf-email">E-mail <span class="cf__req">(wymagane)</span></label>
+    <input
+      class="cf__input"
+      id="kf-email"
+      name="email"
+      type="email"
+      autocomplete="email"
+      inputmode="email"
+      spellcheck="false"
+      maxlength="100"
+      required
+      pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+      title="Adres w formacie nazwa@domena.pl"
+      aria-describedby="kf-email-error"
+    />
+    <p class="cf__error" id="kf-email-error"></p>
+  </div>
+
+  <div class="cf__field">
+    <label class="cf__label" for="kf-phone">Telefon</label>
+    <input
+      class="cf__input cf__input--short"
+      id="kf-phone"
+      name="phone"
+      type="tel"
+      autocomplete="tel"
+      maxlength="30"
+      pattern="[\s\(\)\+\-]*(\d[\s\(\)\+\-]*){6,15}"
+      title="Cyfry, spacje, nawiasy, myślniki i znak +"
+      aria-describedby="kf-phone-error"
+    />
+    <p class="cf__error" id="kf-phone-error"></p>
+  </div>
+
+  <div class="cf__field">
+    <label class="cf__label" for="kf-budget">Pakiet lub budżet</label>
+    <p class="cf__hint" id="kf-budget-hint">
+      {vatNote && <>{vatNote} </>}Co zawiera każdy pakiet, opisuję na stronie <a href="/oferta/">Oferta i&nbsp;ceny</a>.
+    </p>
+    <div class="cf__select">
+      <select class="cf__input" id="kf-budget" name="budget" aria-describedby="kf-budget-hint kf-budget-error">
+        {budgetOptions.map((o) => <option value={o.value} selected={o.value === 'unknown'}>{o.label}</option>)}
+      </select>
+    </div>
+    <p class="cf__error" id="kf-budget-error"></p>
+  </div>
+
+  <div class="cf__field">
+    <label class="cf__label" for="kf-message">Opis projektu <span class="cf__req">(wymagane)</span></label>
+    <p class="cf__hint" id="kf-message-hint">
+      Czym zajmuje się Twoja firma, czego potrzebujesz i&nbsp;do kiedy. Wystarczy kilka zdań.
+    </p>
+    <textarea
+      class="cf__input cf__textarea"
+      id="kf-message"
+      name="message"
+      rows="7"
+      maxlength="5000"
+      required
+      aria-describedby="kf-message-error kf-message-hint"></textarea>
+    <p class="cf__error" id="kf-message-error"></p>
+  </div>
+
+  <!-- Pułapka na boty: niewidoczna dla ludzi i czytników ekranu, poza kolejnością klawisza Tab.
+       Nazwa pola celowo nie przypomina niczego, co wypełnia autouzupełnianie przeglądarki. -->
+  <div class="cf__hp" aria-hidden="true">
+    <label for="kf-hp">Zostaw to pole puste</label>
+    <input id="kf-hp" name="hp_extra" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <!-- Informacja o danych stoi przed przyciskiem, żeby była widoczna przed wysłaniem. -->
+  <p class="cf__rodo">
+    Administratorem danych z&nbsp;formularza jest <span class="cf__nowrap">{company.name}</span>, {company.street}, <span class="cf__nowrap">{company.postalCode} {company.city}</span>. Dane przetwarzam, żeby odpowiedzieć na zapytanie i&nbsp;przygotować ofertę (art.&nbsp;6 ust.&nbsp;1
+    lit.&nbsp;b RODO). Adres IP dołączany do wiadomości służy ochronie przed spamem (art.&nbsp;6 ust.&nbsp;1 lit.&nbsp;f RODO).
+    Szczegóły i&nbsp;Twoje prawa opisuje <a href="/polityka-prywatnosci/">polityka prywatności</a>.
+  </p>
+
+  <div class="cf__actions">
+    <button class="btn cf__submit" type="submit">Wyślij wiadomość</button>
+  </div>
+
+  <!-- Region statusu jest w drzewie dostępności od załadowania strony, więc czytnik ekranu ogłosi już pierwszy komunikat. -->
+  <div class="cf__status" role="status" aria-live="polite" data-status></div>
+</form>
+
+<style>
+  .cf {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .cf > * {
+    margin: 0;
+  }
+
+  .cf__note,
+  .cf__hint,
+  .cf__rodo {
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+  .cf__note {
+    margin-top: -0.5rem;
+  }
+
+  .cf__field {
+    display: grid;
+    gap: 0.4rem;
+    min-width: 0;
+  }
+  /* Pole z błędem: pionowa linia z lewej, więc stan widać bez polegania na kolorze. */
+  .cf__field:has([aria-invalid='true']) {
+    padding-left: 0.875rem;
+    border-left: 3px solid var(--ink);
+  }
+
+  .cf__label {
+    font-weight: 700;
+    line-height: 1.35;
+  }
+  .cf__req {
+    font-weight: 400;
+    color: var(--muted);
+  }
+  .cf__hint {
+    margin: -0.15rem 0 0.1rem;
+    line-height: 1.45;
+  }
+
+  .cf__input {
+    width: 100%;
+    min-height: 2.875rem;
+    padding: 0.55rem 0.75rem;
+    border: 1px solid var(--muted);
+    border-radius: var(--radius);
+    background: var(--paper);
+    color: var(--ink);
+    font: inherit;
+    line-height: 1.4;
+  }
+  .cf__input:hover {
+    border-color: var(--ink);
+  }
+  .cf__input:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 1px;
+    border-color: var(--ink);
+  }
+  .cf__input[aria-invalid='true'] {
+    border: 2px solid var(--ink);
+  }
+  .cf__input--short {
+    max-width: 18rem;
+  }
+  .cf__textarea {
+    min-height: 10rem;
+    resize: vertical;
+  }
+
+  /* Lista wyboru z własną strzałką (kreski w kolorze tekstu, działa w obu motywach). */
+  .cf__select {
+    position: relative;
+  }
+  .cf__select select {
+    appearance: none;
+    padding-right: 2.5rem;
+    cursor: pointer;
+    text-overflow: ellipsis;
+  }
+  .cf__select::after {
+    content: '';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    width: 0.55rem;
+    height: 0.55rem;
+    border-right: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    transform: translateY(-70%) rotate(45deg);
+    pointer-events: none;
+  }
+
+  .cf__error {
+    margin: 0;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .cf__error:empty {
+    display: none;
+  }
+
+  /* Pułapka na boty: poza ekranem (display:none boty łatwo rozpoznają). */
+  .cf__hp {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .cf__actions {
+    margin-top: 0.25rem;
+  }
+  .cf__submit[aria-disabled='true'] {
+    cursor: progress;
+    background: var(--accent-strong);
+    border-color: var(--accent-strong);
+  }
+
+  /* Pusty region: ukryty wizualnie i wyjęty z siatki (bez odstępu), ale nadal w drzewie dostępności. */
+  .cf__status:empty {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .cf__status :global(.cf__msg) {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .cf__status :global(.cf__msg--error) {
+    border-left-color: var(--ink);
+  }
+  .cf__status :global(.cf__msg--info) {
+    border-left-color: var(--line);
+    color: var(--muted);
+  }
+  .cf__status :global(.cf__msg strong) {
+    display: block;
+  }
+  .cf__status :global(.cf__msg a) {
+    white-space: nowrap;
+  }
+  .cf__status :global(.cf__msg:focus-visible) {
+    outline-offset: 2px;
+  }
+
+  .cf__nowrap {
+    white-space: nowrap;
+  }
+
+  .cf__rodo {
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+    line-height: 1.5;
+    max-width: var(--measure);
+  }
+</style>
+
+<script>
+  type Field = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
+  type Tone = 'success' | 'error' | 'info';
+
+  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  // Tekst wstawiany przez skrypt omija sklejanie sierotek z integracji page-weight (ta obrabia gotowy HTML),
+  // więc robię to tutaj: po jednoliterowych spójnikach i przyimkach twarda spacja.
+  const ORPHAN = /(^|[\s\u00a0(„"])([aiouwzAIOUWZ]) +(?=\S)/g;
+  const glue = (text: string) => text.replace(ORPHAN, '$1$2\u00a0').replace(ORPHAN, '$1$2\u00a0');
+
+  // Te same zasady co w api/contact.js.
+  function phoneOk(value: string) {
+    if (!/^[\d\s()+-]+$/.test(value)) return false;
+    const digits = value.replace(/\D/g, '').length;
+    return digits >= 6 && digits <= 15;
+  }
+
+  const checks: Record<string, (value: string) => string> = {
+    name: (v) => (v ? '' : 'Wpisz imię i nazwisko.'),
+    email: (v) => (!v ? 'Wpisz adres e-mail.' : EMAIL.test(v) ? '' : 'Wpisz adres e-mail w formacie nazwa@domena.pl.'),
+    phone: (v) => (!v || phoneOk(v) ? '' : 'Numer telefonu może zawierać tylko cyfry, spacje, nawiasy, myślniki i znak +.'),
+    message: (v) => (v ? '' : 'Opisz krótko projekt.'),
+  };
+
+  function errorsLabel(count: number) {
+    if (count === 1) return 'Formularz ma 1 błąd.';
+    const mod10 = count % 10;
+    const mod100 = count % 100;
+    const word = mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? 'błędy' : 'błędów';
+    return `Formularz ma ${count} ${word}.`;
+  }
+
+  function fixHint(count: number) {
+    return count === 1 ? ' Popraw zaznaczone pole.' : ' Popraw zaznaczone pola.';
+  }
+
+  function setup(form: HTMLFormElement) {
+    const status = form.querySelector<HTMLElement>('[data-status]');
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    if (!status || !submit) return;
+
+    // Od teraz komunikaty o błędach pokazuje skrypt (pod polami), a nie dymki przeglądarki.
+    form.noValidate = true;
+    const submitLabel = submit.textContent?.trim() ?? '';
+    // Przycisk podczas wysyłki nie dostaje atrybutu disabled, bo wtedy traci fokus; blokuje go ta flaga.
+    let sending = false;
+    const { phone = '', phoneHref = '', email = '', response = '' } = form.dataset;
+
+    const field = (name: string) => form.elements.namedItem(name) as Field | null;
+
+    // ?pakiet=starter (link z oferty) zaznacza pakiet na liście.
+    const wanted = new URLSearchParams(window.location.search).get('pakiet');
+    const budget = field('budget');
+    if (wanted && budget instanceof HTMLSelectElement && [...budget.options].some((o) => o.value === wanted)) {
+      budget.value = wanted;
+    }
+
+    function setError(name: string, message: string) {
+      const el = field(name);
+      if (!el) return;
+      const box = document.getElementById(`${el.id}-error`);
+      if (message) el.setAttribute('aria-invalid', 'true');
+      else el.removeAttribute('aria-invalid');
+      if (box) box.textContent = glue(message);
+    }
+
+    function check(name: string) {
+      const el = field(name);
+      const test = checks[name];
+      if (!el) return '';
+      // Pole bez reguły po stronie przeglądarki (np. pakiet): czyścimy błąd, który mógł wskazać serwer.
+      if (!test) {
+        setError(name, '');
+        return '';
+      }
+      const message = test(el.value.trim());
+      setError(name, message);
+      return message;
+    }
+
+    function clearErrors() {
+      form.querySelectorAll<Field>('[aria-invalid]').forEach((el) => setError(el.name, ''));
+    }
+
+    // Komunikat w regionie statusu. Tekst, a po nim opcjonalnie telefon i e-mail jako linki.
+    function say(tone: Tone, lead: string, text = '', withContact = false, focus = false) {
+      const msg = document.createElement('p');
+      msg.className = `cf__msg cf__msg--${tone}`;
+      msg.tabIndex = -1;
+
+      if (lead) {
+        const strong = document.createElement('strong');
+        strong.textContent = glue(lead);
+        msg.append(strong);
+      }
+      if (text) msg.append(glue(text));
+      if (withContact && phone && email) {
+        const tel = document.createElement('a');
+        tel.href = phoneHref;
+        tel.textContent = phone;
+        const mail = document.createElement('a');
+        mail.href = `mailto:${email}`;
+        mail.textContent = email;
+        msg.append(`${msg.childNodes.length > 0 ? ' ' : ''}Zadzwoń: `, tel, ' albo napisz na ', mail, '.');
+      }
+
+      status!.replaceChildren(msg);
+      if (focus) msg.focus();
+    }
+
+    function busy(on: boolean) {
+      sending = on;
+      if (on) submit!.setAttribute('aria-disabled', 'true');
+      else submit!.removeAttribute('aria-disabled');
+      submit!.textContent = on ? 'Wysyłam…' : submitLabel;
+      if (on) form.setAttribute('aria-busy', 'true');
+      else form.removeAttribute('aria-busy');
+    }
+
+    // Po pierwszym błędzie pole sprawdza się na bieżąco, żeby komunikat zniknął od razu po poprawce.
+    form.addEventListener('input', (event) => {
+      const el = event.target as Field;
+      if (el.getAttribute('aria-invalid') === 'true') check(el.name);
+    });
+    // Po wyjściu z wypełnionego pola od razu widać, czy jest w porządku (puste pola nie krzyczą).
+    form.addEventListener('focusout', (event) => {
+      const el = event.target as Field;
+      if (el.name in checks && el.value.trim()) check(el.name);
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (sending) return;
+
+      // Błędy wskazane wcześniej przez serwer (także w polach bez reguły w `checks`) nie mogą zostać na ekranie.
+      clearErrors();
+      const invalid = Object.keys(checks).filter((name) => check(name));
+      if (invalid.length > 0) {
+        say('error', errorsLabel(invalid.length), fixHint(invalid.length));
+        field(invalid[0])?.focus();
+        return;
+      }
+
+      const data: Record<string, string> = {};
+      new FormData(form).forEach((value, key) => {
+        if (typeof value === 'string') data[key] = value;
+      });
+
+      busy(true);
+      say('info', '', 'Wysyłam wiadomość…');
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const json: { success?: boolean; error?: string; fields?: Record<string, string> } = await res
+          .json()
+          .catch(() => ({}));
+
+        if (res.ok && json.success) {
+          form.reset();
+          clearErrors();
+          say('success', 'Dziękuję, wiadomość została wysłana.', ` ${response}`, false, true);
+          return;
+        }
+
+        // Serwer wskazał konkretne pola.
+        const fieldErrors = Object.entries(json.fields ?? {}).filter(([name]) => field(name));
+        if (res.status === 400 && fieldErrors.length > 0) {
+          fieldErrors.forEach(([name, message]) => setError(name, message));
+          say('error', errorsLabel(fieldErrors.length), fixHint(fieldErrors.length));
+          field(fieldErrors[0][0])?.focus();
+          return;
+        }
+
+        const reason =
+          res.status === 429
+            ? ' Było kilka prób w ciągu minuty. Spróbuj ponownie za minutę.'
+            : json.error
+              ? ` ${json.error}.`.replace(/\.\.$/, '.')
+              : '';
+        say('error', 'Nie udało się wysłać wiadomości.', reason, true, true);
+      } catch {
+        say('error', 'Nie udało się wysłać wiadomości.', ' Brak połączenia z serwerem.', true, true);
+      } finally {
+        busy(false);
+      }
+    });
+  }
+
+  document.querySelectorAll<HTMLFormElement>('form[data-contact-form]').forEach(setup);
+</script>

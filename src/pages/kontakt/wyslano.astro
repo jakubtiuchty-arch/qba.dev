@@ -1,0 +1,84 @@
+---
+// Strona po wysłaniu formularza bez JavaScriptu (api/contact.js odsyła tu 303 po udanej wysyłce).
+import Base from '../../layouts/Base.astro';
+import { site } from '../../data/site';
+
+const { contact } = site;
+
+const title = `Wiadomość wysłana | ${site.brand}`;
+const description = `Wiadomość z formularza na ${site.brand} została wysłana. ${contact.responseTime} W pilnej sprawie zadzwoń: ${contact.phone}.`;
+---
+
+<Base title={title} description={description} noindex>
+  <section class="section result" aria-labelledby="wynik-tytul">
+    <div class="container">
+      <h1 id="wynik-tytul">Dziękuję, wiadomość została wysłana</h1>
+      <p class="lead">{contact.responseTime}</p>
+      <p class="result__text">Jeśli sprawa jest pilna, zadzwoń (<span class="nowrap">{contact.hours}</span>).</p>
+
+      <dl class="facts result__facts">
+        <div>
+          <dt>Telefon</dt>
+          <dd>
+            <a href={contact.phoneHref} class="nowrap"><span class="visually-hidden">Zadzwoń: </span>{contact.phone}</a>
+          </dd>
+        </div>
+        <div>
+          <dt>E-mail</dt>
+          <dd><a href={`mailto:${contact.email}`}>{contact.email}</a></dd>
+        </div>
+      </dl>
+
+      <div class="actions">
+        <a class="btn btn--outline" href="/">Wróć na stronę główną</a>
+        <a class="result__link" href="/realizacje/">Zobacz realizacje</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .result {
+    padding-top: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+  }
+  .result h1 {
+    font-size: var(--step-3);
+    max-width: 20ch;
+    margin-bottom: 1.25rem;
+  }
+  .result .lead {
+    margin-bottom: 0.75rem;
+  }
+  .result__text {
+    max-width: var(--measure);
+    margin-bottom: var(--space-l);
+  }
+  /* Te same wiersze faktów co na /kontakt/: kolumna etykiet 8,5rem. */
+  .result__facts {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 32rem;
+    margin-bottom: var(--space-l);
+  }
+  .result__facts > div {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: baseline;
+  }
+  .result__facts dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .result__facts dd a,
+  .result__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+  }
+  .result__link {
+    min-height: 2.75rem;
+  }
+  .nowrap {
+    white-space: nowrap;
+  }
+</style>

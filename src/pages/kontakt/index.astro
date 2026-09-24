@@ -1,0 +1,208 @@
+---
+import Base from '../../layouts/Base.astro';
+import ContactForm from '../../components/ContactForm.astro';
+import { site } from '../../data/site';
+
+const { contact, company, area } = site;
+
+const pageUrl = `${site.url}/kontakt/`;
+const title = `Kontakt – strony dla firm z Trzebnicy i Wrocławia | ${site.brand}`;
+const description = `Zadzwoń: ${contact.phone} albo opisz projekt w formularzu. ${contact.responseTime} Strony internetowe dla firm z Trzebnicy i Wrocławia.`;
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Strona główna', item: `${site.url}/` },
+      { '@type': 'ListItem', position: 2, name: 'Kontakt', item: pageUrl },
+    ],
+  },
+];
+---
+
+<Base title={title} description={description} jsonLd={jsonLd}>
+  <div class="section contact">
+    <div class="container contact__grid">
+      <div class="contact__intro">
+        <h1>Kontakt</h1>
+        <p class="lead">Telefon odbieram {contact.hours}. {contact.responseTime}</p>
+        <p class="contact__solo">
+          Pracuję sam. Rozmawiasz ze mną od pierwszego telefonu do publikacji strony i&nbsp;później.
+        </p>
+
+        <p class="contact__call">
+          <a class="btn" href={contact.phoneHref}>Zadzwoń: {contact.phone}</a>
+        </p>
+
+        <!-- Godziny są w leadzie wyżej, więc lista ich nie powtarza. -->
+        <dl class="facts rows">
+          <div>
+            <dt>E-mail</dt>
+            <dd><a href={`mailto:${contact.email}`}>{contact.email}</a></dd>
+          </div>
+          <div>
+            <dt>Obszar działania</dt>
+            <dd>{area.label}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <section class="contact__form" id="formularz" aria-labelledby="formularz-tytul">
+        <h2 id="formularz-tytul">Opisz swój projekt</h2>
+        <ContactForm />
+      </section>
+
+      <section class="company" aria-labelledby="firma-tytul">
+        <h2 id="firma-tytul">Faktury i&nbsp;dane firmy</h2>
+        <p class="company__text">Faktury wystawia <span class="nowrap">{company.name}</span>, firma, którą prowadzę.</p>
+        <dl class="facts rows">
+          <div>
+            <dt>Nazwa</dt>
+            <dd>{company.name}</dd>
+          </div>
+          <div>
+            <dt>Adres</dt>
+            <dd>{company.street}, <span class="nowrap">{company.postalCode} {company.city}</span></dd>
+          </div>
+          <div>
+            <dt>NIP</dt>
+            <dd>{company.nip}</dd>
+          </div>
+          <div>
+            <dt>REGON</dt>
+            <dd>{company.regon}</dd>
+          </div>
+          <div>
+            <dt>KRS</dt>
+            <dd>{company.krs}</dd>
+          </div>
+          <div>
+            <dt>Sąd rejestrowy</dt>
+            <dd class="rows__long">{company.court}</dd>
+          </div>
+          <div>
+            <dt>Kapitał zakładowy</dt>
+            <dd>{company.capital}</dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .contact {
+    padding-top: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+  }
+  /* Telefon: wstęp → formularz → dane firmy (kolejność w kodzie i na ekranie).
+     Szeroki ekran: wstęp i dane firmy w lewej kolumnie, formularz w prawej. */
+  .contact__grid {
+    display: grid;
+    gap: var(--space-l) 4rem;
+    align-items: start;
+  }
+
+  .contact__intro h1 {
+    margin-bottom: 1.25rem;
+  }
+  .contact__intro .lead {
+    margin-bottom: 0.75rem;
+  }
+  .contact__solo {
+    max-width: 46ch;
+    margin-bottom: var(--space-l);
+  }
+
+  /* Telefon: najkrótsza droga do rozmowy, więc to główny przycisk wstępu. */
+  .contact__call {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Fakty jako wiersze. Telefon: etykieta nad wartością (jak w .facts), bo długa nazwa sądu
+     w wąskiej kolumnie zajęłaby kilka wierszy. Szerszy ekran: etykieta z lewej, wartość z prawej. */
+  .rows {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 32rem;
+  }
+  .rows dd {
+    overflow-wrap: anywhere;
+  }
+  .rows dd a {
+    display: inline-block;
+    min-height: 1.5rem;
+  }
+  .rows__long {
+    font-weight: 400;
+  }
+  @media (min-width: 30rem) {
+    .rows > div {
+      display: grid;
+      grid-template-columns: 8.5rem minmax(0, 1fr);
+      gap: 1rem;
+      align-items: baseline;
+    }
+    .rows dd {
+      margin: 0;
+    }
+  }
+
+  .contact__form {
+    min-width: 0;
+    padding: clamp(1.25rem, 0.75rem + 2vw, 2.5rem);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  .contact__form h2,
+  .company h2 {
+    font-size: var(--step-2);
+    margin-bottom: 1rem;
+  }
+
+  .company {
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--line);
+  }
+  .company__text {
+    max-width: 46ch;
+  }
+  .nowrap {
+    white-space: nowrap;
+  }
+
+  /* Wąski telefon: formularz bez ramki, żeby pola miały całą szerokość ekranu. */
+  @media (max-width: 29.99rem) {
+    .contact__form {
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+    .contact__form h2 {
+      margin-top: 1rem;
+    }
+  }
+
+  @media (min-width: 62rem) {
+    .contact__grid {
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+      grid-template-areas:
+        'intro form'
+        'company form';
+      grid-template-rows: auto 1fr;
+    }
+    .contact__intro {
+      grid-area: intro;
+    }
+    .contact__form {
+      grid-area: form;
+    }
+    .company {
+      grid-area: company;
+      margin-top: var(--space-l);
+      padding-top: 0;
+      border-top: 0;
+    }
+  }
+</style>

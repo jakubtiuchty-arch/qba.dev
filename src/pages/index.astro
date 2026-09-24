@@ -1,4 +1,555 @@
 ---
+import { Picture } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import Testimonials from '../components/Testimonials.astro';
+import { site, pricing, process, guarantees, testimonials, formatPLN, gross } from '../data/site';
+import { projects, getProject } from '../data/projects';
+import { personPhoto } from '../data/photos';
+
+const { person, contact, area, company } = site;
+const nbsp = '\u00a0';
+
+// Twarda spacja po liczbie („7 dni”, „30 minut”, „24 godzin”), żeby liczba nie została sama na końcu wiersza.
+// Jednoliterowe spójniki i przyimki wiąże już integracja page-weight.
+const tie = (text: string) => text.replace(/(?<=^|[\s(])(\d+) /g, `$1${nbsp}`);
+
+const photo = personPhoto();
+const luxMeble = getProject('lux-meble');
+const serwisZebry = getProject('serwis-zebry');
+const heroProject = luxMeble ?? projects[0];
+// Gdy w hero jest zrzut realizacji, na liście stawiamy ją na końcu, żeby ten sam zrzut nie stał dwa razy pod rząd.
+const homeProjects = photo ? projects : [...projects.filter((p) => p !== heroProject), heroProject];
+
+// Ceny: zawsze z danych. Gdy kwoty są netto, obok pokazujemy brutto.
+const isNet = pricing.pricesAreNet;
+const vatPercent = Math.round(pricing.vatRate * 100);
+const priceMain = (amount: number) => `${formatPLN(amount)} ${isNet ? 'netto' : 'brutto'}`;
+const priceGross = (amount: number) => (isNet ? `${formatPLN(gross(amount))} brutto` : null);
+const priceText = (amount: number) => {
+  const second = priceGross(amount);
+  return second ? `${priceMain(amount)} (${second})` : priceMain(amount);
+};
+const minPrice = Math.min(...pricing.packages.map((p) => p.price));
+
+// Jedno źródło terminu dla leadu, faktów i opisu strony.
+const deadline = `7${nbsp}dni roboczych od otrzymania materiałów`;
+
+// Oferta w skrócie: z każdego pakietu dwie pierwsze pozycje, które go odróżniają od innych,
+// oraz pozycja o wsparciu po publikacji (szukana po liczbie dni z pola `support`, nie po miejscu na liście).
+type Package = (typeof pricing.packages)[number];
+const allIncludes: string[] = pricing.packages.flatMap((p) => [...p.includes]);
+const isShared = (item: string) => allIncludes.filter((i) => i === item).length > 1;
+const highlights = (pkg: Package) => {
+  const includes: readonly string[] = pkg.includes;
+  const support =
+    includes.find((i) => i.startsWith(`${pkg.support} dni wsparcia`)) ?? includes[includes.length - 1];
+  const distinct = includes.filter((i) => i !== support && !isShared(i)).slice(0, 2);
+  return [...distinct, support].map(tie);
+};
+
+// Kontakt: pierwsze zdanie pierwszego kroku z `process` („30 minut rozmowy o firmie, klientach i celu strony.”).
+const firstStep = process[0]?.text.split(/(?<=\.)\s/)[0];
+const firstStepText = firstStep ? tie(firstStep.charAt(0).toLowerCase() + firstStep.slice(1)) : null;
+
+const title = 'Strony internetowe: Trzebnica, Wrocław – Jakub Tiuchty';
+const description = `Projektuję i koduję strony internetowe dla firm z Trzebnicy, Wrocławia i okolic. Termin: ${deadline}. Ceny od ${priceMain(minPrice)}.`;
 ---
-<Base title="Test" description="Test"><div class="container section"><h1>Strony w Trzebnicy i we Wrocławiu</h1><p>Robię to z klientem i o czasie, a w razie czego u mnie.</p><script>const x = "a b";</script></div></Base>
+
+<Base title={title} description={description}>
+  <section class="section hero" aria-labelledby="hero-tytul">
+    <div class="container">
+      <h1 id="hero-tytul" class="hero__title">Strony internetowe dla firm z&nbsp;Trzebnicy i&nbsp;okolic</h1>
+
+      <div class:list={['hero__grid', { 'hero__grid--photo': photo }]}>
+        <div class="hero__text">
+          <p class="lead">
+            Jestem {person.name}. Sam projektuję i&nbsp;koduję strony. Oddaję je w&nbsp;ciągu {deadline}. Ceny
+            zaczynają się od&nbsp;{priceText(minPrice)}.
+          </p>
+          <div class="actions">
+            <a class="btn nowrap" href={contact.phoneHref}>Zadzwoń: {contact.phone}</a>
+            <a class="btn btn--outline" href="/kontakt/">Opisz swój projekt</a>
+          </div>
+        </div>
+
+        {
+          photo ? (
+            <figure class="hero__media hero__media--photo">
+              <Picture
+                src={photo.src}
+                alt={photo.alt}
+                formats={['avif', 'webp']}
+                fallbackFormat="jpg"
+                widths={[400, 640, 900]}
+                sizes="(min-width: 56rem) 24rem, calc(100vw - 2rem)"
+                loading="eager"
+                fetchpriority="high"
+              />
+            </figure>
+          ) : (
+            <figure class="hero__media">
+              <div class="hero__shot">
+                <Picture
+                  src={heroProject.image}
+                  alt={heroProject.imageAlt}
+                  formats={['avif', 'webp']}
+                  fallbackFormat="jpg"
+                  widths={[480, 800, 1200, 1600]}
+                  sizes="(min-width: 76rem) 40rem, (min-width: 56rem) 52vw, calc(100vw - 2rem)"
+                  loading="eager"
+                  fetchpriority="high"
+                />
+              </div>
+              <figcaption class="small muted">
+                Strona {heroProject.name}, którą zaprojektowałem i&nbsp;zakodowałem.{' '}
+                <a href={`/realizacje/${heroProject.slug}/`}>Zobacz realizację {heroProject.name}</a>
+              </figcaption>
+            </figure>
+          )
+        }
+      </div>
+
+      <dl class="facts hero__facts">
+        <div>
+          <dt>Cena</dt>
+          <dd>
+            Od {priceMain(minPrice)}
+            {priceGross(minPrice) && <span class="facts__sub">({priceGross(minPrice)})</span>}
+          </dd>
+        </div>
+        <div>
+          <dt>Czas realizacji</dt>
+          <dd>{deadline}</dd>
+        </div>
+        <div>
+          <dt>Kontakt</dt>
+          <dd>Bezpośrednio ze mną</dd>
+        </div>
+        <div>
+          <dt>Obszar</dt>
+          <dd>{area.label}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="realizacje">
+    <div class="container">
+      <h2 id="realizacje">Realizacje</h2>
+      <p class="intro">
+        Strony i&nbsp;systemy, które zbudowałem dla firm. W&nbsp;opisie każdej realizacji jest link do strony klienta.
+      </p>
+      <div class="projects">
+        {homeProjects.map((project) => <ProjectCard project={project} headingLevel={3} />)}
+      </div>
+      <p class="more">
+        <a href="/realizacje/">Zobacz wszystkie realizacje</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--surface offer" aria-labelledby="oferta">
+    <div class="container">
+      <h2 id="oferta">Oferta i ceny</h2>
+      <p class="intro">
+        Ceny pakietów i&nbsp;dodatków są jawne.{
+          isNet && ` To kwoty netto, na fakturze dochodzi do nich ${vatPercent}%${nbsp}VAT.`
+        }
+      </p>
+
+      <ul class="packages" role="list">
+        {
+          pricing.packages.map((pkg) => (
+            <li class="pkg">
+              <div class="pkg__head">
+                <h3 class="pkg__name">{pkg.name}</h3>
+                <p class="pkg__for">{pkg.for}</p>
+              </div>
+              <p class="pkg__price">
+                Od <strong>{priceMain(pkg.price)}</strong>
+                {priceGross(pkg.price) && (
+                  <>
+                    <br />
+                    <span class="muted">({priceGross(pkg.price)})</span>
+                  </>
+                )}
+              </p>
+              <ul class="checklist pkg__list">
+                {highlights(pkg).map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </li>
+          ))
+        }
+      </ul>
+
+      <p class="small muted note">{pricing.note}</p>
+      <p class="more">
+        <a href="/oferta/">Zobacz pełną ofertę i dodatki</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="jak-pracuje">
+    <div class="container">
+      <h2 id="jak-pracuje">Jak pracuję</h2>
+      <p class="intro">
+        Przez cały projekt rozmawiasz ze mną: od pierwszego telefonu do publikacji i&nbsp;po niej.
+      </p>
+
+      <ol class="steps" role="list">
+        {
+          process.map((step) => (
+            <li class="step">
+              <p class="step__when">{step.when}</p>
+              <div class="step__body">
+                <h3 class="step__title">{step.title}</h3>
+                <p>{tie(step.text)}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+
+      <h3 class="guarantees__title">Gwarancje</h3>
+      <ul class="guarantees" role="list">
+        {
+          guarantees.map((g) => (
+            <li class="guarantee">
+              <h4>{tie(g.title)}</h4>
+              <p>{tie(g.text)}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  {
+    testimonials.length > 0 && (
+      <div class="section">
+        <div class="container">
+          <Testimonials />
+        </div>
+      </div>
+    )
+  }
+
+  <section class="section" aria-labelledby="o-mnie">
+    <div class="container">
+      <div class="prose about">
+        <h2 id="o-mnie">O mnie</h2>
+        <p>
+          {person.role} dla firm.{person.since != null && ` Robię to od ${person.since} roku.`}
+          {
+            luxMeble && serwisZebry && (
+              <>
+                {' '}Zbudowałem między innymi <a href={`/realizacje/${luxMeble.slug}/`}>stronę producenta mebli na wymiar</a>{' '}
+                i&nbsp;<a href={`/realizacje/${serwisZebry.slug}/`}>system serwisowy z&nbsp;asystentem AI i&nbsp;płatnościami online</a>.
+              </>
+            )
+          }
+        </p>
+        <p>
+          Pracuję sam. Faktury wystawia <span class="nowrap">{company.name}</span>, firma, którą prowadzę.
+        </p>
+        <p class="more">
+          <a href="/o-mnie/">Przeczytaj, jak pracuję i&nbsp;jakich narzędzi używam</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section contact" aria-labelledby="kontakt">
+    <div class="container contact__grid">
+      <div class="contact__text">
+        <h2 id="kontakt">Zadzwoń albo napisz</h2>
+        <p>
+          {firstStepText && <>Pierwszy krok to {firstStepText} </>}{tie(contact.responseTime)}
+        </p>
+        <div class="actions">
+          <a class="btn" href="/kontakt/">Opisz swój projekt</a>
+          <a class="btn btn--outline nowrap" href={contact.phoneHref}>Zadzwoń: {contact.phone}</a>
+        </div>
+      </div>
+
+      <dl class="facts contact__facts">
+        <div>
+          <dt>Telefon</dt>
+          <dd><a href={contact.phoneHref} class="nowrap">{contact.phone}</a></dd>
+        </div>
+        <div>
+          <dt>E-mail</dt>
+          <dd><a href={`mailto:${contact.email}`}>{contact.email}</a></dd>
+        </div>
+        <div>
+          <dt>Godziny pracy</dt>
+          <dd>{contact.hours}</dd>
+        </div>
+        <div>
+          <dt>Obszar</dt>
+          <dd>{area.label}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* Długość wiersza: ok. 66 znaków. Jednostka em (a nie ch) liczy się od średniej szerokości litery
+     w Atkinson Hyperlegible Next i skaluje się z rozmiarem fontu danego elementu. */
+  .hero__text .lead,
+  .hero__media figcaption,
+  .intro,
+  .note,
+  .step__body p,
+  .guarantee p,
+  .about {
+    max-width: 30em;
+  }
+
+  /* Hero: jedyne „odważne” miejsce — duży, spokojny nagłówek. */
+  .hero {
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) var(--space-section);
+  }
+  /* Pod faktami w hero jest już linia (.facts), więc następna sekcja nie dokłada drugiej. */
+  .hero + .section {
+    border-top: 0;
+  }
+  .hero__title {
+    font-size: var(--step-4);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    max-width: 20ch;
+    margin-bottom: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  }
+  .hero__grid {
+    display: grid;
+    gap: var(--space-l);
+    align-items: start;
+  }
+  .hero__text .lead {
+    margin-bottom: 1.75rem;
+  }
+  .hero__media {
+    margin: 0;
+  }
+  .hero__shot {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .hero__shot :global(img) {
+    width: 100%;
+  }
+  .hero__media figcaption {
+    margin-top: 0.75rem;
+  }
+  .hero__media figcaption a {
+    display: inline-block;
+    min-height: 1.5rem;
+  }
+  .hero__media--photo :global(img) {
+    width: 100%;
+    max-width: 24rem;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: var(--radius);
+  }
+  .hero__facts {
+    margin-top: var(--space-l);
+  }
+  .facts__sub {
+    display: block;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  @media (min-width: 56rem) {
+    .hero__grid {
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    }
+    .hero__grid--photo {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+    }
+  }
+
+  /* Wspólne dla sekcji */
+  .intro {
+    color: var(--muted);
+    margin-bottom: var(--space-l);
+  }
+  .more {
+    margin: var(--space-l) 0 0;
+    font-weight: 700;
+  }
+  .more a {
+    display: inline-block;
+    min-height: 1.5rem;
+  }
+
+  /* Realizacje: dwie kolumny na komputerze */
+  .projects {
+    display: grid;
+    gap: var(--space-l) 2rem;
+  }
+  @media (min-width: 48rem) {
+    .projects {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* Oferta w skrócie: wiersze jak w tabeli, oddzielone linią. Blok tła sam oddziela sekcję, bez linii u góry. */
+  .section.offer {
+    border-top: 0;
+  }
+  .packages {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .pkg {
+    display: grid;
+    gap: 0.75rem 2rem;
+    padding-block: 1.5rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .pkg__name {
+    font-size: var(--step-2);
+    margin-bottom: 0.25rem;
+  }
+  .pkg__for {
+    margin: 0;
+    color: var(--muted);
+    max-width: 40ch;
+  }
+  .pkg__price {
+    margin: 0;
+    line-height: 1.45;
+  }
+  .pkg__price strong {
+    font-size: var(--step-1);
+  }
+  .pkg__list {
+    margin: 0;
+  }
+  .pkg__list li:last-child {
+    margin-bottom: 0;
+  }
+  .note {
+    margin: 1.25rem 0 0;
+  }
+  @media (min-width: 56rem) {
+    .pkg {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.8fr) minmax(0, 1.3fr);
+      align-items: start;
+    }
+  }
+
+  /* Jak pracuję: kroki w prawdziwej kolejności */
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .step {
+    display: grid;
+    gap: 0.25rem 2rem;
+    padding-block: 1.25rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .step__when {
+    margin: 0;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  .step__title {
+    font-size: var(--step-1);
+    margin-bottom: 0.25rem;
+  }
+  .step__body p {
+    margin: 0;
+  }
+  @media (min-width: 40rem) {
+    .step {
+      grid-template-columns: 8rem minmax(0, 1fr);
+    }
+    .step__when {
+      padding-top: 0.15rem;
+    }
+  }
+
+  .guarantees__title {
+    font-size: var(--step-2);
+    margin-top: var(--space-section);
+  }
+  .guarantees {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1.5rem 2rem;
+  }
+  .guarantee {
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+  .guarantee h4 {
+    font-size: var(--step-1);
+    margin-bottom: 0.4rem;
+  }
+  .guarantee p {
+    margin: 0;
+  }
+  @media (min-width: 48rem) {
+    .guarantees {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .nowrap {
+    white-space: nowrap;
+  }
+
+  /* Kontakt: ostatnia sekcja, odstęp do stopki daje stopka (tak jak na pozostałych podstronach). */
+  .contact {
+    padding-bottom: 0;
+  }
+  .contact__grid {
+    display: grid;
+    gap: var(--space-l) 3rem;
+    align-items: start;
+  }
+  .contact__text p {
+    max-width: 29em;
+    margin-bottom: 1.5rem;
+  }
+  @media (min-width: 30rem) {
+    .contact__facts {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .contact__facts > div {
+      display: grid;
+      grid-template-columns: 9.5rem minmax(0, 1fr);
+      gap: 1rem;
+      align-items: baseline;
+    }
+    .contact__facts dd {
+      margin: 0;
+    }
+  }
+  .contact__facts dd a {
+    display: inline-block;
+    min-height: 1.5rem;
+  }
+  @media (min-width: 56rem) {
+    .contact__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    }
+  }
+</style>
