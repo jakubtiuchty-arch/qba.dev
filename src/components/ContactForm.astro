@@ -26,7 +26,7 @@ const budgetOptions = [
   { value: 'unknown', label: 'Jeszcze nie wiem' },
 ];
 const vatNote = pricing.pricesAreNet
-  ? `Kwoty netto, do faktury dochodzi ${Math.round(pricing.vatRate * 100)}% VAT.`
+  ? `Kwoty netto, na fakturze doliczam do nich ${Math.round(pricing.vatRate * 100)}%${NBSP}VAT.`
   : '';
 ---
 
@@ -123,25 +123,32 @@ const vatNote = pricing.pricesAreNet
     <p class="cf__error" id="kf-message-error"></p>
   </div>
 
-  <!-- Pułapka na boty: niewidoczna dla ludzi i czytników ekranu, poza kolejnością klawisza Tab.
-       Nazwa pola celowo nie przypomina niczego, co wypełnia autouzupełnianie przeglądarki. -->
+  {/* Pułapka na boty: niewidoczna dla ludzi i czytników ekranu, poza kolejnością klawisza Tab.
+       Nazwa pola celowo nie przypomina niczego, co wypełnia autouzupełnianie przeglądarki. */}
   <div class="cf__hp" aria-hidden="true">
     <label for="kf-hp">Zostaw to pole puste</label>
     <input id="kf-hp" name="hp_extra" type="text" tabindex="-1" autocomplete="off" />
   </div>
 
-  <!-- Informacja o danych stoi przed przyciskiem, żeby była widoczna przed wysłaniem. -->
-  <p class="cf__rodo">
-    Administratorem danych z&nbsp;formularza jest <span class="cf__nowrap">{company.name}</span>, {company.street}, <span class="cf__nowrap">{company.postalCode} {company.city}</span>. Dane przetwarzam, żeby odpowiedzieć na zapytanie i&nbsp;przygotować ofertę (art.&nbsp;6 ust.&nbsp;1
-    lit.&nbsp;b RODO). Adres IP dołączany do wiadomości służy ochronie przed spamem (art.&nbsp;6 ust.&nbsp;1 lit.&nbsp;f RODO).
-    Szczegóły i&nbsp;Twoje prawa opisuje <a href="/polityka-prywatnosci/">polityka prywatności</a>.
-  </p>
+  {/* Informacja o danych stoi przed przyciskiem, żeby była widoczna przed wysłaniem.
+       Linia nad nią należy do owijki, żeby miała szerokość pól, a tekst zostaje w granicy --measure.
+       Podstawy prawne i odbiorcy zgodnie z /polityka-prywatnosci/ (lit. f dla piszących w imieniu firmy). */}
+  <div class="cf__legal">
+    <p class="cf__rodo">
+      Administratorem danych z&nbsp;formularza jest <span class="cf__nowrap">{company.name}</span> (<span class="cf__nowrap">{company.street}</span>, <span class="cf__nowrap">{company.postalCode} {company.city}</span>, <a href={`mailto:${contact.email}`}>{contact.email}</a>),
+      firma, którą prowadzę. Dane przetwarzam, żeby
+      odpowiedzieć na zapytanie i&nbsp;przygotować ofertę (art.&nbsp;6 ust.&nbsp;1 lit.&nbsp;b RODO, a&nbsp;gdy
+      piszesz w&nbsp;imieniu firmy: lit.&nbsp;f). Adres IP dołączany do wiadomości służy ochronie przed spamem
+      (art.&nbsp;6 ust.&nbsp;1 lit.&nbsp;f RODO). Wiadomość przechodzi przez serwery Vercel i&nbsp;Resend, firm
+      z&nbsp;USA. Szczegóły, okres przechowywania i&nbsp;Twoje prawa opisuje <a href="/polityka-prywatnosci/">polityka prywatności</a>.
+    </p>
+  </div>
 
   <div class="cf__actions">
     <button class="btn cf__submit" type="submit">Wyślij wiadomość</button>
   </div>
 
-  <!-- Region statusu jest w drzewie dostępności od załadowania strony, więc czytnik ekranu ogłosi już pierwszy komunikat. -->
+  {/* Region statusu jest w drzewie dostępności od załadowania strony, więc czytnik ekranu ogłosi już pierwszy komunikat. */}
   <div class="cf__status" role="status" aria-live="polite" data-status></div>
 </form>
 
@@ -308,9 +315,12 @@ const vatNote = pricing.pricesAreNet
     white-space: nowrap;
   }
 
-  .cf__rodo {
+  .cf__legal {
     padding-top: 1.25rem;
     border-top: 1px solid var(--line);
+  }
+  .cf__rodo {
+    margin: 0;
     line-height: 1.5;
     max-width: var(--measure);
   }
@@ -320,7 +330,9 @@ const vatNote = pricing.pricesAreNet
   type Field = HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
   type Tone = 'success' | 'error' | 'info';
 
-  const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Te same zasady co isValidEmail w api/contact.js: bez znaków, które w adresie są zwykle literówką
+  // (, ; : < > ( ) [ ] " \), i z co najmniej dwuznakową końcówką domeny bez kropki na końcu.
+  const EMAIL = /^[^\s@,;:<>()[\]"\\]+@[^\s@,;:<>()[\]"\\]+\.[^\s@,;:<>()[\]"\\.]{2,}$/;
 
   // Tekst wstawiany przez skrypt omija sklejanie sierotek z integracji page-weight (ta obrabia gotowy HTML),
   // więc robię to tutaj: po jednoliterowych spójnikach i przyimkach twarda spacja.
@@ -437,9 +449,14 @@ const vatNote = pricing.pricesAreNet
     }
 
     // Po pierwszym błędzie pole sprawdza się na bieżąco, żeby komunikat zniknął od razu po poprawce.
+    // Gdy poprawione jest ostatnie błędne pole, znika też podsumowanie błędów w regionie statusu.
     form.addEventListener('input', (event) => {
       const el = event.target as Field;
-      if (el.getAttribute('aria-invalid') === 'true') check(el.name);
+      if (el.getAttribute('aria-invalid') !== 'true') return;
+      check(el.name);
+      if (!form.querySelector('[aria-invalid="true"]') && status.querySelector('.cf__msg--error')) {
+        status.replaceChildren();
+      }
     });
     // Po wyjściu z wypełnionego pola od razu widać, czy jest w porządku (puste pola nie krzyczą).
     form.addEventListener('focusout', (event) => {
@@ -473,6 +490,9 @@ const vatNote = pricing.pricesAreNet
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify(data),
+          // Zawieszone połączenie nie może blokować formularza bez końca. 15 s to więcej niż 8 s,
+          // które api/contact.js czeka na Resend.
+          signal: typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(15000) : undefined,
         });
         const json: { success?: boolean; error?: string; fields?: Record<string, string> } = await res
           .json()
@@ -501,8 +521,10 @@ const vatNote = pricing.pricesAreNet
               ? ` ${json.error}.`.replace(/\.\.$/, '.')
               : '';
         say('error', 'Nie udało się wysłać wiadomości.', reason, true, true);
-      } catch {
-        say('error', 'Nie udało się wysłać wiadomości.', ' Brak połączenia z serwerem.', true, true);
+      } catch (e) {
+        const reason =
+          e instanceof DOMException && e.name === 'TimeoutError' ? ' Serwer nie odpowiada.' : ' Brak połączenia z serwerem.';
+        say('error', 'Nie udało się wysłać wiadomości.', reason, true, true);
       } finally {
         busy(false);
       }

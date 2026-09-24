@@ -39,10 +39,6 @@ const deadline = deadlineDays ? `${deadlineDays}${NBSP}dni roboczych od otrzyman
 const revisions = steps.map((s) => s.text.match(/(\p{L}+|\d+) rund\p{L}* poprawek/u)?.[0]).find(Boolean) ?? null;
 const revisionRounds = revisions ? revisions.replace(/ poprawek$/, '') : null; // „dwie rundy”
 
-// Krok „Kodowanie”: „…: wersja na telefon, formularze, dane dla Google.” → trzy pozycje.
-const codingStep = steps.find((s) => s.title === 'Kodowanie');
-const codingItems = codingStep?.text.split(': ')[1]?.replace(/\.$/, '').split(', ') ?? [];
-
 // Materiały od klienta: „…wysyłasz materiały: logo, teksty, zdjęcia.” → trzy pozycje.
 const materials = steps.map((s) => s.text.match(/materiały: ([^.]+)\./)?.[1]).find(Boolean)?.split(', ') ?? [];
 const materialsNote = tie(
@@ -71,13 +67,14 @@ const supportRange =
   minSupport === maxSupport ? `${minSupport}${NBSP}dni` : `${minSupport}–${maxSupport}${NBSP}dni, zależnie od pakietu`;
 
 // „W każdej stronie”: pozycje wspólne dla wszystkich pakietów oraz to, co proces i gwarancje
-// obiecują każdemu projektowi. Nic spoza danych.
+// obiecują każdemu projektowi. Nic spoza danych. Bez pozycji z kroku „Kodowanie”: wersja na telefon
+// jest już we wspólnych pozycjach pakietów, a „formularze” w liczbie mnogiej nie zgadzają się
+// z pakietami, w których jest jeden formularz. Formularz i SEO każdego pakietu są na jego liście.
 const commonIncludes = firstPackage.includes.filter((item) =>
   packages.every((p) => (p.includes as readonly string[]).includes(item)),
 );
 const everyItems = [
   ...commonIncludes,
-  codingItems.length > 0 && upperFirst(joinPl(codingItems)),
   revisions && `${upperFirst(revisions)} projektu`,
   `Wsparcie po publikacji: ${minSupport === maxSupport ? supportOptions : `${supportOptions}, zależnie od pakietu`}`,
   showsHowToUse && 'Pokazuję, jak korzystać ze strony',
@@ -111,6 +108,8 @@ const cms = packages
   .flatMap((p) => p.includes.filter((i) => i.startsWith('CMS')).map((item) => ({ pkg: p, item })))
   .at(0);
 const cmsEverywhere = cms ? packages.every((p) => p.includes.some((i) => i.startsWith('CMS'))) : false;
+// Pakiety bez CMS, po nazwie: „Starter i Pro”.
+const noCms = packages.filter((p) => !p.includes.some((i) => i.startsWith('CMS'))).map((p) => p.name);
 const shop = packages
   .flatMap((p) => p.addons.map((a) => ({ pkg: p, addon: a })))
   .find(({ addon }) => addon.name === 'Sklep internetowy');
@@ -189,7 +188,10 @@ const jsonLd = [
       <dl class="facts intro__facts">
         <div>
           <dt>Ceny</dt>
-          <dd>od {priceText(minPrice)}</dd>
+          <dd>
+            Od {priceMain(minPrice)}
+            {priceGross(minPrice) && <span class="facts__sub">({priceGross(minPrice)})</span>}
+          </dd>
         </div>
         {
           deadline && (
@@ -399,7 +401,8 @@ const jsonLd = [
               <div class="faq__answer">
                 <p>
                   Tak, w&nbsp;pakiecie {cms.pkg.name}: jest w&nbsp;nim {tie(cms.item)}.
-                  {!cmsEverywhere && tie(' W innym pakiecie wycenię to osobno.')}
+                  {!cmsEverywhere &&
+                    tie(` W ${noCms.length > 1 ? 'pakietach' : 'pakiecie'} ${joinPl(noCms)} wycenię to osobno.`)}
                 </p>
               </div>
             </details>
@@ -445,10 +448,20 @@ const jsonLd = [
 
   /* Długość wiersza: --measure (66ch) daje w tym kroju ok. 95 znaków, a zasada to ok. 66.
      30em to ok. 65 znaków przy średniej szerokości polskiej litery w Atkinson Hyperlegible Next. */
-  .intro { padding-bottom: var(--space-l); }
+  /* Odstęp od nagłówka strony do h1 taki sam jak na pozostałych podstronach. */
+  .intro {
+    padding-top: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+    padding-bottom: var(--space-l);
+  }
   .intro h1 { margin-bottom: 0.4em; }
   .intro .lead { max-width: 30em; }
   .intro__facts { margin-top: var(--space-l); }
+  /* Brutto pod netto, zwykłą czcionką, jak w faktach na stronie głównej. */
+  .facts__sub {
+    display: block;
+    font-weight: 400;
+    color: var(--muted);
+  }
 
   .packages-section h2 { margin-bottom: 0; }
 

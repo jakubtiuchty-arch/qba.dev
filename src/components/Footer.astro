@@ -2,6 +2,9 @@
 import { nav, site } from '../data/site';
 
 const { company, contact, profiles, area } = site;
+// Wyrazy z łącznikiem (np. „Wrocławia-Fabrycznej”) w całości: po polsku łącznik na końcu wiersza
+// wyglądałby jak błędne przeniesienie. Nieparzyste elementy po split() to te wyrazy.
+const courtParts = company.court.split(/(\S+-\S+)/);
 const year = new Date().getFullYear();
 const current = Astro.url.pathname;
 const isErrorPage = current.startsWith('/404');
@@ -41,7 +44,7 @@ const profileLinks = [
         {company.name}<br />
         {company.street}, {company.postalCode} {company.city}<br />
         NIP {company.nip}, REGON {company.regon}<br />
-        KRS {company.krs}, {company.court}<br />
+        KRS {company.krs}, {courtParts.map((part, i) => (i % 2 ? <span class="nowrap">{part}</span> : part))}<br />
         Kapitał zakładowy: {company.capital}
       </address>
     </section>
@@ -79,6 +82,7 @@ const profileLinks = [
   li { margin-bottom: 0.35rem; }
   li a, p a { display: inline-block; min-height: 1.5rem; }
   address { font-style: normal; color: var(--muted); }
+  .nowrap { white-space: nowrap; }
   .bottom {
     display: flex;
     flex-wrap: wrap;

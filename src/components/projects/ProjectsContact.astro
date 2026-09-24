@@ -20,8 +20,7 @@ const minPrice = Math.min(...pricing.packages.map((p) => p.price));
     <div class="contact__text">
       <h2 id={headingId}>{heading}</h2>
       <p>
-        Rozmawiasz bezpośrednio ze mną&nbsp;– od pierwszego telefonu do publikacji i&nbsp;po niej.
-        Pakiety kosztują od&nbsp;{priceText(minPrice)}. To, czego nie ma w&nbsp;pakietach, wyceniam osobno.
+        Rozmawiasz bezpośrednio ze mną. Pakiety kosztują od&nbsp;{priceText(minPrice)}. To, czego nie ma w&nbsp;pakietach, wyceniam osobno.
       </p>
       <div class="actions">
         <a class="btn" href="/kontakt/">Opisz swój projekt</a>
@@ -47,6 +46,11 @@ const minPrice = Math.min(...pricing.packages.map((p) => p.price));
 </section>
 
 <style>
+  /* Kontakt jest ostatnią sekcją strony: odstęp do stopki daje sama stopka (margin-top), jak na stronie głównej,
+     w ofercie i w „O mnie”. Bez tego padding sekcji i margines stopki się sumują. */
+  .contact:last-child {
+    padding-bottom: 0;
+  }
   .contact__grid {
     display: grid;
     gap: var(--space-l) 3rem;

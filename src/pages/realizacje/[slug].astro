@@ -245,9 +245,14 @@ const jsonLd = [
   }
 
   /* Opis: nagłówek po lewej, treść po prawej, wiersze oddzielone linią.
-     Linia nad pierwszym wierszem oddziela opis od zrzutu, więc sekcja nie potrzebuje własnej. */
-  .details {
+     Linia nad pierwszym wierszem oddziela opis od zrzutu, więc sekcja nie potrzebuje własnej.
+     Globalna reguła `.section:not(.section--surface) + .section:not(.section--surface)` dodaje linię
+     na całą szerokość okna i ma specyficzność 0,4,0; `.section.head + .section.details` (0,6,0 z atrybutami
+     Astro) wygrywa niezależnie od kolejności arkuszy. */
+  .section.head + .section.details {
     border-top: 0;
+  }
+  .details {
     padding-top: 0;
   }
   .row {
@@ -300,18 +305,21 @@ const jsonLd = [
     font-size: var(--step--1);
     color: var(--muted);
   }
+  /* Nazwa w kolorze tekstu i w rozmiarze nazw z kart realizacji (--step-2); link poznać po podkreśleniu w akcencie. */
   .next__name {
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: var(--step-3);
+    font-size: var(--step-2);
     line-height: 1.12;
-    color: var(--accent);
+    color: var(--ink);
     text-decoration: underline;
+    text-decoration-color: var(--accent);
     text-decoration-thickness: 1px;
     text-underline-offset: 0.15em;
   }
   .next:hover .next__name {
     color: var(--accent-strong);
+    text-decoration-color: var(--accent-strong);
     text-decoration-thickness: 2px;
   }
   .next__summary {

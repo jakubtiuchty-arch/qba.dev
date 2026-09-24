@@ -66,22 +66,24 @@ function isCountedLink(html, ref) {
 
 // Polska typografia: jednoliterowe spójniki i przyimki (a, i, o, u, w, z) nie zostają na końcu wiersza.
 // Zamieniamy spację po nich na twardą — tylko w tekście, poza <script>, <style>, <pre> i <textarea>.
-const SKIP = /^<(script|style|pre|textarea)\b/i;
+// Całe bloki <script>, <style>, <pre> i <textarea> (razem z treścią) przepuszczamy bez zmian i nie dzielimy
+// ich po znacznikach: w zminifikowanym CSS stoi „<” (np. „@media (width<=51.99rem)”), więc dzielenie po
+// „<…>” połykało zamykające </style> i reszta strony (tak było na 404.html) zostawała bez twardych spacji.
+const RAW_BLOCK = /<(script|style|pre|textarea)\b[^>]*>[\s\S]*?<\/\1\s*>/gi;
 function glueOrphans(html) {
-  const parts = html.split(/(<[^>]+>)/);
-  let skipUntil = null;
+  let out = '';
+  let last = 0;
+  for (const m of html.matchAll(RAW_BLOCK)) {
+    out += glueMarkup(html.slice(last, m.index)) + m[0];
+    last = m.index + m[0].length;
+  }
+  return out + glueMarkup(html.slice(last));
+}
+function glueMarkup(chunk) {
+  const parts = chunk.split(/(<[^>]+>)/);
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
-    if (part.startsWith('<')) {
-      if (skipUntil) {
-        if (part.toLowerCase().startsWith(`</${skipUntil}`)) skipUntil = null;
-      } else {
-        const m = part.match(SKIP);
-        if (m && !part.endsWith('/>')) skipUntil = m[1].toLowerCase();
-      }
-      continue;
-    }
-    if (skipUntil || !part.trim()) continue;
+    if (part.startsWith('<') || !part.trim()) continue;
     const re = /(^|[\s\u00a0(„"])([aiouwzAIOUWZ]) +(?=\S)/g;
     // Dwa przebiegi: łapiemy też sąsiadujące jednoliterowe słowa („a w razie”).
     parts[i] = part

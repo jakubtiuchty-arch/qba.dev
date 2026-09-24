@@ -14,14 +14,16 @@ const description = `Formularz na ${site.brand} nie przyjął wiadomości. Zadzw
   <section class="section result" aria-labelledby="wynik-tytul">
     <div class="container">
       <h1 id="wynik-tytul">Wiadomość nie została wysłana</h1>
+      {/* Bez JavaScriptu puste pola i zły format blokuje zwykle już przeglądarka (required, pattern),
+           więc częstsze powody stoją na początku. */}
       <p class="lead">
-        Możliwe powody: puste wymagane pole, błędny adres e-mail lub numer telefonu, kilka prób w&nbsp;ciągu minuty albo
-        chwilowa awaria formularza.
+        Możliwe powody: kilka prób w&nbsp;ciągu minuty, chwilowa awaria formularza albo puste lub błędnie wypełnione
+        pole.
       </p>
-      <!-- Link „Wróć do formularza” to nowe żądanie, więc formularz otwiera się pusty. Mówię o tym wprost. -->
+      {/* Link do formularza to nowe żądanie, więc formularz otwiera się pusty. Mówi o tym nazwa przycisku,
+           a główną akcją jest telefon, który nie kasuje tego, co ktoś napisał. */}
       <p class="result__text">
-        Przycisk „Wstecz” w&nbsp;przeglądarce zwykle przywraca formularz z&nbsp;wpisanym tekstem. Przycisk „Wróć do
-        formularza” otwiera go pusty.
+        Przycisk „Wstecz” w&nbsp;przeglądarce zwykle przywraca formularz z&nbsp;wpisanym tekstem.
         Opis możesz też wysłać e-mailem na <a href={`mailto:${contact.email}`}>{contact.email}</a>. {contact.responseTime}
       </p>
 
@@ -38,13 +40,13 @@ const description = `Formularz na ${site.brand} nie przyjął wiadomości. Zadzw
         </div>
         <div>
           <dt>Godziny pracy</dt>
-          <dd>{contact.hours}</dd>
+          <dd class="nowrap">{contact.hours}</dd>
         </div>
       </dl>
 
       <div class="actions">
-        <a class="btn" href="/kontakt/#formularz">Wróć do formularza</a>
-        <a class="btn btn--outline" href={contact.phoneHref}>Zadzwoń: {contact.phone}</a>
+        <a class="btn" href={contact.phoneHref}>Zadzwoń: {contact.phone}</a>
+        <a class="btn btn--outline" href="/kontakt/#formularz">Otwórz pusty formularz</a>
       </div>
     </div>
   </section>
@@ -57,7 +59,6 @@ const description = `Formularz na ${site.brand} nie przyjął wiadomości. Zadzw
   .result h1 {
     font-size: var(--step-3);
     max-width: 20ch;
-    margin-bottom: 1.25rem;
   }
   .result .lead {
     margin-bottom: 0.75rem;
@@ -66,21 +67,26 @@ const description = `Formularz na ${site.brand} nie przyjął wiadomości. Zadzw
     max-width: var(--measure);
     margin-bottom: var(--space-l);
   }
-  /* Te same wiersze faktów co na /kontakt/: kolumna etykiet 8,5rem. */
+  /* Te same wiersze faktów co na /kontakt/: na telefonie etykieta nad wartością,
+     od 30rem kolumna etykiet 8,5rem. */
   .result__facts {
     grid-template-columns: minmax(0, 1fr);
     max-width: 32rem;
     margin-bottom: var(--space-l);
   }
-  .result__facts > div {
-    display: grid;
-    grid-template-columns: 8.5rem minmax(0, 1fr);
-    gap: 1rem;
-    align-items: baseline;
-  }
   .result__facts dd {
-    margin: 0;
     overflow-wrap: anywhere;
+  }
+  @media (min-width: 30rem) {
+    .result__facts > div {
+      display: grid;
+      grid-template-columns: 8.5rem minmax(0, 1fr);
+      gap: 1rem;
+      align-items: baseline;
+    }
+    .result__facts dd {
+      margin: 0;
+    }
   }
   .result__facts dd a {
     display: inline-flex;

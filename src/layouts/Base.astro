@@ -127,7 +127,9 @@ const ld = [organizationLd, personLd, ...jsonLd];
   <body>
     <a class="skip-link" href="#tresc">Przejdź do treści</a>
     <Header />
-    <main id="tresc" tabindex="-1">
+    {/* Bez tabindex: link „Przejdź do treści” i tak przenosi punkt startowy Tab do <main>,
+        a kliknięcie w zwykły tekst nie ustawia fokusu na całym <main>. */}
+    <main id="tresc">
       <slot />
     </main>
     <Footer />

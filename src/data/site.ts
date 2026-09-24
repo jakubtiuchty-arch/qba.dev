@@ -37,7 +37,8 @@ export const site = {
     regon: '360788259',
     krs: '0000543463',
     court: 'Sąd Rejonowy dla Wrocławia-Fabrycznej we Wrocławiu, Wydział Gospodarczy Krajowego Rejestru Sądowego',
-    capital: '6 000,00 zł',
+    // Twarde spacje (\u00a0) jak w formatPLN(): kwota nie rozdziela się między wiersze.
+    capital: '6\u00a0000,00\u00a0zł',
   },
   // Profile zewnętrzne. `null` = link się nie pokaże.
   profiles: {

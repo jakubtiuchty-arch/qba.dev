@@ -44,7 +44,6 @@ const description = `Wiadomość z formularza na ${site.brand} została wysłana
   .result h1 {
     font-size: var(--step-3);
     max-width: 20ch;
-    margin-bottom: 1.25rem;
   }
   .result .lead {
     margin-bottom: 0.75rem;
@@ -53,21 +52,26 @@ const description = `Wiadomość z formularza na ${site.brand} została wysłana
     max-width: var(--measure);
     margin-bottom: var(--space-l);
   }
-  /* Te same wiersze faktów co na /kontakt/: kolumna etykiet 8,5rem. */
+  /* Te same wiersze faktów co na /kontakt/: na telefonie etykieta nad wartością,
+     od 30rem kolumna etykiet 8,5rem. */
   .result__facts {
     grid-template-columns: minmax(0, 1fr);
     max-width: 32rem;
     margin-bottom: var(--space-l);
   }
-  .result__facts > div {
-    display: grid;
-    grid-template-columns: 8.5rem minmax(0, 1fr);
-    gap: 1rem;
-    align-items: baseline;
-  }
   .result__facts dd {
-    margin: 0;
     overflow-wrap: anywhere;
+  }
+  @media (min-width: 30rem) {
+    .result__facts > div {
+      display: grid;
+      grid-template-columns: 8.5rem minmax(0, 1fr);
+      gap: 1rem;
+      align-items: baseline;
+    }
+    .result__facts dd {
+      margin: 0;
+    }
   }
   .result__facts dd a,
   .result__link {

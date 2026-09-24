@@ -59,7 +59,7 @@ const description = `Projektuję i koduję strony internetowe dla firm z Trzebni
 <Base title={title} description={description}>
   <section class="section hero" aria-labelledby="hero-tytul">
     <div class="container">
-      <h1 id="hero-tytul" class="hero__title">Strony internetowe dla firm z&nbsp;Trzebnicy i&nbsp;okolic</h1>
+      <h1 id="hero-tytul" class="hero__title">Strony internetowe dla&nbsp;firm z&nbsp;Trzebnicy i&nbsp;okolic</h1>
 
       <div class:list={['hero__grid', { 'hero__grid--photo': photo }]}>
         <div class="hero__text">
@@ -69,7 +69,7 @@ const description = `Projektuję i koduję strony internetowe dla firm z Trzebni
           </p>
           <div class="actions">
             <a class="btn nowrap" href={contact.phoneHref}>Zadzwoń: {contact.phone}</a>
-            <a class="btn btn--outline" href="/kontakt/">Opisz swój projekt</a>
+            <a class="btn btn--outline" href="/kontakt/#formularz">Opisz swój projekt</a>
           </div>
         </div>
 
@@ -247,7 +247,7 @@ const description = `Projektuję i koduję strony internetowe dla firm z Trzebni
             luxMeble && serwisZebry && (
               <>
                 {' '}Zbudowałem między innymi <a href={`/realizacje/${luxMeble.slug}/`}>stronę producenta mebli na wymiar</a>{' '}
-                i&nbsp;<a href={`/realizacje/${serwisZebry.slug}/`}>system serwisowy z&nbsp;asystentem AI i&nbsp;płatnościami online</a>.
+                oraz <a href={`/realizacje/${serwisZebry.slug}/`}>system serwisowy z&nbsp;asystentem AI i&nbsp;płatnościami online</a>.
               </>
             )
           }
@@ -256,7 +256,7 @@ const description = `Projektuję i koduję strony internetowe dla firm z Trzebni
           Pracuję sam. Faktury wystawia <span class="nowrap">{company.name}</span>, firma, którą prowadzę.
         </p>
         <p class="more">
-          <a href="/o-mnie/">Przeczytaj, jak pracuję i&nbsp;jakich narzędzi używam</a>
+          <a href="/o-mnie/">Przeczytaj o mnie: narzędzia, realizacje i&nbsp;dane firmy</a>
         </p>
       </div>
     </div>
@@ -270,7 +270,7 @@ const description = `Projektuję i koduję strony internetowe dla firm z Trzebni
           {firstStepText && <>Pierwszy krok to {firstStepText} </>}{tie(contact.responseTime)}
         </p>
         <div class="actions">
-          <a class="btn" href="/kontakt/">Opisz swój projekt</a>
+          <a class="btn" href="/kontakt/#formularz">Opisz swój projekt</a>
           <a class="btn btn--outline nowrap" href={contact.phoneHref}>Zadzwoń: {contact.phone}</a>
         </div>
       </div>
@@ -310,19 +310,23 @@ const description = `Projektuję i koduję strony internetowe dla firm z Trzebni
     max-width: 30em;
   }
 
-  /* Hero: jedyne „odważne” miejsce — duży, spokojny nagłówek. */
+  /* Hero: jedyne „odważne” miejsce — duży, spokojny nagłówek.
+     Bez dolnego paddingu: linia pod faktami jest podziałem, a odstęp do „Realizacji” daje padding następnej
+     sekcji — tak jak na pozostałych przejściach między sekcjami. */
   .hero {
-    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) var(--space-section);
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem) 0;
   }
   /* Pod faktami w hero jest już linia (.facts), więc następna sekcja nie dokłada drugiej. */
   .hero + .section {
     border-top: 0;
   }
+  /* Większy niż h1 podstron na szerokim ekranie. Twarde spacje w treści trzymają „dla firm”
+     i „z Trzebnicy” razem; na telefonie trzy wiersze zamiast czterech. */
   .hero__title {
-    font-size: var(--step-4);
+    font-size: clamp(2.25rem, 1rem + 5.4vw, 5.25rem);
     line-height: 1.05;
     letter-spacing: -0.015em;
-    max-width: 20ch;
+    max-width: none;
     margin-bottom: clamp(1.5rem, 1rem + 2vw, 2.5rem);
   }
   .hero__grid {

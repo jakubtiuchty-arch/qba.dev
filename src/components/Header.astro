@@ -14,15 +14,14 @@ const ariaCurrent = (href: string) =>
       <span class="wordmark__name">Jakub Tiuchty<span class="visually-hidden"> – strona główna</span></span>
     </a>
 
-    <a class="bar__phone" href={site.contact.phoneHref}>
-      <span class="visually-hidden">Zadzwoń: </span>{site.contact.phone}
-    </a>
-
-    <button class="menu-toggle" type="button" popovertarget="menu" aria-controls="menu">
-      Menu
-    </button>
-
+    {/* Kolejność w kodzie = kolejność na ekranie komputera (logo, menu, telefon), więc Tab idzie od lewej do prawej.
+        Na telefonie menu jest ukrytym popoverem, a widać logo, telefon i przycisk „Menu”. */}
     <nav id="menu" class="menu" popover aria-label="Główne menu">
+      {/* autofocus: po otwarciu menu fokus trafia tutaj, a nie zostaje na zasłoniętym przycisku „Menu”.
+          Przy ładowaniu strony przycisk jest ukryty, więc niczego nie przejmuje. */}
+      <button class="menu__close" type="button" popovertarget="menu" popovertargetaction="hide" autofocus>
+        Zamknij menu
+      </button>
       <ul>
         {nav.map((item) => (
           <li>
@@ -30,12 +29,27 @@ const ariaCurrent = (href: string) =>
           </li>
         ))}
       </ul>
-      <button class="menu__close" type="button" popovertarget="menu" popovertargetaction="hide">
-        Zamknij menu
-      </button>
     </nav>
+
+    <a class="bar__phone" href={site.contact.phoneHref}>
+      <span class="visually-hidden">Zadzwoń: </span>{site.contact.phone}
+    </a>
+
+    <button class="menu-toggle" type="button" popovertarget="menu" aria-controls="menu">
+      Menu
+    </button>
   </div>
 </header>
+
+<script>
+  // Menu otwarte na wąskim ekranie zostałoby w warstwie popovera po poszerzeniu okna (obrót tabletu, zoom).
+  // Po przejściu progu 52rem zamykamy je, żeby wróciło do zwykłej nawigacji w pasku.
+  const menu = document.getElementById('menu');
+  const wide = window.matchMedia('(min-width: 52rem)');
+  wide.addEventListener('change', (event) => {
+    if (event.matches && menu?.matches(':popover-open')) menu.hidePopover();
+  });
+</script>
 
 <style>
   .site-header {
@@ -121,13 +135,15 @@ const ariaCurrent = (href: string) =>
     font-size: var(--step-1);
     text-decoration: none;
   }
-  .menu a[aria-current] {
-    text-decoration: underline;
+  /* Bieżąca strona (i dział, np. opis realizacji w „Realizacjach”). Selektor musi być co najmniej tak
+     szczegółowy jak `.menu li a` wyżej, inaczej jego `text-decoration: none` wygrywa. */
+  .menu li a[aria-current] {
+    text-decoration-line: underline;
     text-decoration-thickness: 2px;
     text-underline-offset: 0.3em;
   }
+  /* Pierwszy w kodzie, więc pierwszy w kolejności Tab; wizualnie w prawym górnym rogu panelu. */
   .menu__close {
-    order: -1;
     align-self: flex-end;
     min-height: 2.75rem;
     padding: 0.5rem 1rem;
@@ -166,8 +182,18 @@ const ariaCurrent = (href: string) =>
       border: 0;
       font-size: 1rem;
     }
-    .menu li a:hover { text-decoration: underline; text-underline-offset: 0.3em; }
-    .bar__phone { order: 3; margin-left: 0; font-size: 1rem; }
+    /* Sama właściwość `-line`, bez skrótu: skrót zerowałby grubość 2px na bieżącej pozycji. */
+    .menu li a:hover { text-decoration-line: underline; text-underline-offset: 0.3em; }
+    .bar__phone { margin-left: 0; font-size: 1rem; }
     .menu { margin-left: auto; }
+  }
+
+  /* Telefon: przy otwartym menu strona pod przyciemnieniem się nie przewija (panel menu tak, ma overflow: auto).
+     scrollbar-gutter zostawia miejsce po pasku przewijania, więc przy powiększeniu na komputerze nic nie skacze. */
+  @media (max-width: 51.99rem) {
+    :global(html:has(#menu:popover-open)) {
+      overflow: hidden;
+      scrollbar-gutter: stable;
+    }
   }
 </style>

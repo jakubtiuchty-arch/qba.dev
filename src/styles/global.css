@@ -73,7 +73,8 @@ h3 { font-size: var(--step-2); }
 h4 { font-size: var(--step-1); }
 
 p, ul, ol, dl, blockquote, figure { margin: 0 0 1em; }
-p { text-wrap: pretty; }
+/* Pozycje list też, żeby nie zostawało jedno słowo w ostatnim wierszu (np. „PDF”, „(RAG)”). */
+p, li { text-wrap: pretty; }
 
 img, svg, video { display: block; max-width: 100%; height: auto; }
 
@@ -165,6 +166,14 @@ strong { font-weight: 700; }
 .facts > div { padding: 1rem 1rem 1rem 0; border-bottom: 1px solid var(--line); }
 .facts dt { font-size: var(--step--1); color: var(--muted); }
 .facts dd { margin: 0.15rem 0 0; font-weight: 700; }
+/* Cztery fakty: 2 × 2 na tablecie, 4 w rzędzie na komputerze (auto-fit dawał 3 + 1 z jedną pozycją w drugim rzędzie).
+   :where() trzyma specyficzność na poziomie .facts, więc lokalne układy (np. .contact__facts, .rows) dalej wygrywają. */
+@media (min-width: 40rem) {
+  .facts:where(:has(> :nth-child(4):last-child)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 64rem) {
+  .facts:where(:has(> :nth-child(4):last-child)) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
 
 .checklist { list-style: none; padding: 0; }
 .checklist li { position: relative; padding-left: 1.6em; margin-bottom: 0.5em; }

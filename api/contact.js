@@ -44,8 +44,12 @@ function escapeHtml(text) {
         .replace(/'/g, '&#039;');
 }
 
+// Odrzuca znaki, które w adresie są zwykle literówką albo śmieciem (, ; : < > ( ) [ ] " \), i wymaga
+// co najmniej dwuznakowej końcówki domeny bez kropki na końcu. Taki adres trafia do reply_to w Resend,
+// więc lepiej wskazać błąd przy polu niż zgubić wiadomość na odrzuceniu po stronie Resend.
+// To samo wyrażenie ma stała EMAIL w src/components/ContactForm.astro.
 function isValidEmail(email) {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const regex = /^[^\s@,;:<>()[\]"\\]+@[^\s@,;:<>()[\]"\\]+\.[^\s@,;:<>()[\]"\\.]{2,}$/;
     return regex.test(email);
 }
 

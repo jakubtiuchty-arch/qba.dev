@@ -30,7 +30,7 @@ const addons = pkg.addons.map((addon) => ({
   </div>
 
   <p class="package__price">
-    <span class="package__from">od {priceMain(pkg.price)}</span>{' '}
+    <span class="package__from">Od <strong>{priceMain(pkg.price)}</strong></span>{' '}
     {grossPrice && <span class="package__gross">({grossPrice})</span>}
   </p>
 
@@ -112,10 +112,10 @@ const addons = pkg.addons.map((addon) => ({
     color: var(--muted);
   }
 
+  /* Pogrubiona tylko kwota, jak w skrócie oferty na stronie głównej. */
   .package__from {
     display: block;
     font-size: var(--step-1);
-    font-weight: 700;
     line-height: 1.3;
   }
   .package__gross {

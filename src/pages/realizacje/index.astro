@@ -46,7 +46,10 @@ const jsonLd = [
           projects.map((project, index) => (
             <li class="projects__item">
               <ProjectCard project={project} headingLevel={2} eager={index === 0} />
-              <p class="projects__site">
+              <p class="projects__links">
+                <a href={`/realizacje/${project.slug}/`}>
+                  Zobacz opis realizacji<span class="visually-hidden"> {project.name}</span>
+                </a>
                 <a href={project.url}>Zobacz stronę {project.domain}</a>
               </p>
             </li>
@@ -81,11 +84,15 @@ const jsonLd = [
     flex-direction: column;
     min-width: 0;
   }
-  .projects__site {
+  /* Najpierw opis realizacji na qba.dev, potem strona klienta (ten sam układ co „Co już zbudowałem” w „O mnie”). */
+  .projects__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.5rem;
     margin: 0.75rem 0 0;
     font-weight: 700;
   }
-  .projects__site a {
+  .projects__links a {
     display: inline-block;
     min-height: 1.5rem;
     overflow-wrap: anywhere;

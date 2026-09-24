@@ -4,6 +4,9 @@ import ContactForm from '../../components/ContactForm.astro';
 import { site } from '../../data/site';
 
 const { contact, company, area } = site;
+// Wyrazy z łącznikiem („Wrocławia-Fabrycznej”) w całości, jak w stopce: łącznik na końcu wiersza
+// wyglądałby jak błędne przeniesienie. Nieparzyste elementy po split() to te wyrazy.
+const courtParts = company.court.split(/(\S+-\S+)/);
 
 const pageUrl = `${site.url}/kontakt/`;
 const title = `Kontakt – strony dla firm z Trzebnicy i Wrocławia | ${site.brand}`;
@@ -26,7 +29,7 @@ const jsonLd = [
     <div class="container contact__grid">
       <div class="contact__intro">
         <h1>Kontakt</h1>
-        <p class="lead">Telefon odbieram {contact.hours}. {contact.responseTime}</p>
+        <p class="lead">Telefon odbieram <span class="nowrap">{contact.hours}</span>. {contact.responseTime}</p>
         <p class="contact__solo">
           Pracuję sam. Rozmawiasz ze mną od pierwszego telefonu do publikacji strony i&nbsp;później.
         </p>
@@ -35,7 +38,7 @@ const jsonLd = [
           <a class="btn" href={contact.phoneHref}>Zadzwoń: {contact.phone}</a>
         </p>
 
-        <!-- Godziny są w leadzie wyżej, więc lista ich nie powtarza. -->
+        {/* Godziny są w leadzie wyżej, więc lista ich nie powtarza. */}
         <dl class="facts rows">
           <div>
             <dt>E-mail</dt>
@@ -79,7 +82,7 @@ const jsonLd = [
           </div>
           <div>
             <dt>Sąd rejestrowy</dt>
-            <dd class="rows__long">{company.court}</dd>
+            <dd class="rows__long">{courtParts.map((part, i) => (i % 2 ? <span class="nowrap">{part}</span> : part))}</dd>
           </div>
           <div>
             <dt>Kapitał zakładowy</dt>
@@ -103,9 +106,6 @@ const jsonLd = [
     align-items: start;
   }
 
-  .contact__intro h1 {
-    margin-bottom: 1.25rem;
-  }
   .contact__intro .lead {
     margin-bottom: 0.75rem;
   }

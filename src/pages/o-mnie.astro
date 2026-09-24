@@ -61,6 +61,11 @@ const toolEvidence = projects
 
 const vatPercent = Math.round(pricing.vatRate * 100);
 
+// Rok wpisu Scanter Sp. z o.o. do KRS (brief, §2). To fakt o firmie, nie o stażu w robieniu stron (person.since).
+// Gdy w site.ts pojawi się `company.krsSince`, ma pierwszeństwo; `null` ukrywa wiersz.
+const companyKrsSince = (company as typeof company & { krsSince?: number | null }).krsSince;
+const krsSince = companyKrsSince === undefined ? 2015 : companyKrsSince;
+
 const profileLinks = [
   profiles.googleBusiness && { href: profiles.googleBusiness, label: 'Profil w Google' },
   profiles.linkedin && { href: profiles.linkedin, label: 'LinkedIn' },
@@ -247,6 +252,14 @@ const profileLinks = [
             <dt>KRS</dt>
             <dd>{company.krs}</dd>
           </div>
+          {
+            krsSince != null && (
+              <div>
+                <dt>W KRS od</dt>
+                <dd>{krsSince}&nbsp;r.</dd>
+              </div>
+            )
+          }
           <div>
             <dt>REGON</dt>
             <dd>{company.regon}</dd>

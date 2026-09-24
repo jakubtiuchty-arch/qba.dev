@@ -56,7 +56,7 @@ export const projects: Project[] = [
     sector: 'Serwis urządzeń Zebra · firmy',
     summary: 'System serwisowy z asystentem AI, który prowadzi klienta od opisu usterki do opłaconej naprawy.',
     context:
-      'Serwis naprawia urządzenia Zebra. Celem było, żeby zgłoszenie, płatność i faktura nie wymagały ręcznej obsługi.',
+      'Serwis-Zebry.pl naprawia urządzenia Zebra. System ma sprawić, żeby zgłoszenie, płatność i faktura nie wymagały ręcznej obsługi.',
     scope: [
       'Asystent AI do wstępnej diagnozy usterek, oparty na dokumentacji urządzeń (RAG)',
       'Automatyczny obieg zgłoszeń od usterki do naprawy',
@@ -86,7 +86,7 @@ export const projects: Project[] = [
     ],
     stack: ['Panel klienta', 'Serwis', 'Drukarki fiskalne'],
     image: rejestratory,
-    imageAlt: 'Strona główna Rejestratory.info: zdjęcie lasu, nagłówek o sprzęcie IT dla leśnictwa i wyszukiwarka produktów',
+    imageAlt: 'Strona główna Rejestratory.info: zdjęcie lasu, hasło „jedyne takie miejsce w internecie”, opis sprzętu IT dla leśnictwa i wyszukiwarka produktów',
     year: null,
     results: null,
   },
@@ -98,7 +98,7 @@ export const projects: Project[] = [
     sector: 'Sektor publiczny · urzędy i jednostki',
     summary: 'Strona z panelem klienta, przez którą jednostki publiczne zamawiają zestawy do EZD RP i materiały eksploatacyjne.',
     context:
-      'EZDRP24 oferuje jednostkom publicznym zestawy sprzętu do elektronicznego zarządzania dokumentacją (EZD RP) oraz materiały eksploatacyjne.',
+      'EZDRP24 oferuje jednostkom publicznym zestawy sprzętu do elektronicznego zarządzania dokumentacją (EZD RP) oraz materiały eksploatacyjne. Strona pokazuje ofertę zestawów, a przez panel klienta jednostki zamawiają etykiety i taśmy termotransferowe. To projekt dla Scanter Sp. z o.o., firmy, którą prowadzę.',
     scope: [
       'Strona z ofertą zestawów do EZD RP',
       'Panel klienta dla jednostek publicznych',

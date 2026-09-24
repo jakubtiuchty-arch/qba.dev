@@ -55,7 +55,7 @@ const heading = (id: (typeof toc)[number]['id']) => toc.find((item) => item.id =
 
 <Base title={title} description={description} jsonLd={jsonLd}>
   <article class="section policy" aria-labelledby="polityka-tytul">
-    <div class="container">
+    <div class="container policy__layout">
       <header class="policy__head">
         <h1 id="polityka-tytul">Polityka prywatności</h1>
         <p class="policy__date">Obowiązuje od <time datetime="2026-09-24">24&nbsp;września 2026&nbsp;r.</time></p>
@@ -74,251 +74,253 @@ const heading = (id: (typeof toc)[number]['id']) => toc.find((item) => item.id =
         </ol>
       </nav>
 
-      <section class="part" aria-labelledby="administrator">
-        <h2 id="administrator">{heading('administrator')}</h2>
-        <p>
-          Administratorem Twoich danych osobowych jest <span class="nowrap">{company.name}</span>, firma, którą
-          prowadzę. Nazywam się {person.name} i&nbsp;sam odbieram telefony i&nbsp;odpowiadam na wiadomości. Gdy
-          w&nbsp;tym tekście piszę „ja”, mam na myśli administratora.
-        </p>
-        <dl class="rows">
-          <div>
-            <dt>Firma</dt>
-            <dd>{company.name}</dd>
-          </div>
-          <div>
-            <dt>Adres</dt>
-            <dd>{company.street}, <span class="nowrap">{company.postalCode} {company.city}</span></dd>
-          </div>
-          <div>
-            <dt>Numery rejestrowe</dt>
-            <dd>KRS&nbsp;{company.krs}, NIP&nbsp;{company.nip}, REGON&nbsp;{company.regon}</dd>
-          </div>
-          <div>
-            <dt>E-mail</dt>
-            <dd><a href={`mailto:${contact.email}`}>{contact.email}</a></dd>
-          </div>
-          <div>
-            <dt>Telefon</dt>
-            <dd><a class="nowrap" href={contact.phoneHref}>{contact.phone}</a> <span class="nowrap">({contact.hours})</span></dd>
-          </div>
-        </dl>
-        <p>
-          W&nbsp;każdej sprawie dotyczącej Twoich danych napisz na <a href={`mailto:${contact.email}`}>{contact.email}</a> albo
-          zadzwoń. Możesz też wysłać list na adres firmy.
-        </p>
-      </section>
+      <div class="policy__body">
+        <section class="part" aria-labelledby="administrator">
+          <h2 id="administrator">{heading('administrator')}</h2>
+          <p>
+            Administratorem Twoich danych osobowych jest <span class="nowrap">{company.name}</span>, firma, którą
+            prowadzę. Nazywam się {person.name} i&nbsp;sam odbieram telefony i&nbsp;odpowiadam na wiadomości. Gdy
+            w&nbsp;tym tekście piszę „ja”, mam na myśli administratora.
+          </p>
+          <dl class="rows">
+            <div>
+              <dt>Firma</dt>
+              <dd>{company.name}</dd>
+            </div>
+            <div>
+              <dt>Adres</dt>
+              <dd>{company.street}, <span class="nowrap">{company.postalCode} {company.city}</span></dd>
+            </div>
+            <div>
+              <dt>Numery rejestrowe</dt>
+              <dd>KRS&nbsp;{company.krs}, NIP&nbsp;{company.nip}, REGON&nbsp;{company.regon}</dd>
+            </div>
+            <div>
+              <dt>E-mail</dt>
+              <dd><a href={`mailto:${contact.email}`}>{contact.email}</a></dd>
+            </div>
+            <div>
+              <dt>Telefon</dt>
+              <dd><a class="nowrap" href={contact.phoneHref}>{contact.phone}</a> <span class="nowrap">({contact.hours})</span></dd>
+            </div>
+          </dl>
+          <p>
+            W&nbsp;każdej sprawie dotyczącej Twoich danych napisz na <a href={`mailto:${contact.email}`}>{contact.email}</a> albo
+            zadzwoń. Możesz też wysłać list na adres firmy.
+          </p>
+        </section>
 
-      <section class="part" aria-labelledby="dane">
-        <h2 id="dane">{heading('dane')}</h2>
-        <p>Zbieram dane, które mi przekazujesz:</p>
-        <dl class="rows">
-          <div>
-            <dt>Formularz kontaktowy</dt>
-            <dd>
-              Imię i&nbsp;nazwisko, adres <span class="nowrap">e-mail</span>, numer telefonu, wybrany pakiet lub budżet
-              i&nbsp;treść wiadomości. Do wiadomości dołączany jest też adres IP, z&nbsp;którego ją wysłano. Służy
-              bezpieczeństwu: pomaga rozpoznać spam i&nbsp;nadużycia.
-            </dd>
-          </div>
-          <div>
-            <dt>E-mail i&nbsp;telefon</dt>
-            <dd>
-              Gdy piszesz albo dzwonisz bezpośrednio: Twój adres <span class="nowrap">e-mail</span> lub numer telefonu, treść korespondencji
-              i&nbsp;informacje, które przekażesz w&nbsp;rozmowie.
-            </dd>
-          </div>
-          <div>
-            <dt>Po zawarciu umowy</dt>
-            <dd>Dane potrzebne do umowy i&nbsp;faktury, na przykład nazwa firmy, adres i&nbsp;NIP.</dd>
-          </div>
-        </dl>
-        <p>
-          Oprócz tego, gdy oglądasz stronę, serwer zapisuje techniczne dane o&nbsp;połączeniu. Opisuję je
-          w&nbsp;części <a href="#ciasteczka">„{heading('ciasteczka')}”</a>.
-        </p>
-      </section>
+        <section class="part" aria-labelledby="dane">
+          <h2 id="dane">{heading('dane')}</h2>
+          <p>Zbieram dane, które mi przekazujesz:</p>
+          <dl class="rows">
+            <div>
+              <dt>Formularz kontaktowy</dt>
+              <dd>
+                Imię i&nbsp;nazwisko, adres <span class="nowrap">e-mail</span>, numer telefonu, wybrany pakiet lub budżet
+                i&nbsp;treść wiadomości. Do wiadomości dołączany jest też adres IP, z&nbsp;którego ją wysłano. Służy
+                bezpieczeństwu: pomaga rozpoznać spam i&nbsp;nadużycia.
+              </dd>
+            </div>
+            <div>
+              <dt>E-mail i&nbsp;telefon</dt>
+              <dd>
+                Gdy piszesz albo dzwonisz bezpośrednio: Twój adres <span class="nowrap">e-mail</span> lub numer telefonu, treść korespondencji
+                i&nbsp;informacje, które przekażesz w&nbsp;rozmowie.
+              </dd>
+            </div>
+            <div>
+              <dt>Po zawarciu umowy</dt>
+              <dd>Dane potrzebne do umowy i&nbsp;faktury, na przykład nazwa firmy, adres i&nbsp;NIP.</dd>
+            </div>
+          </dl>
+          <p>
+            Oprócz tego, gdy oglądasz stronę, serwer zapisuje techniczne dane o&nbsp;połączeniu. Opisuję je
+            w&nbsp;części <a href="#ciasteczka">„{heading('ciasteczka')}”</a>.
+          </p>
+        </section>
 
-      <section class="part" aria-labelledby="cele">
-        <h2 id="cele">{heading('cele')}</h2>
-        <dl class="rows">
-          <div>
-            <dt>Odpowiedź na zapytanie i&nbsp;przygotowanie oferty</dt>
-            <dd>{art('b')}: działania przed zawarciem umowy, podejmowane na Twoją prośbę.</dd>
-          </div>
-          <div>
-            <dt>Zawarcie i&nbsp;wykonanie umowy, jeśli przyjmiesz ofertę</dt>
-            <dd>{art('b')}: wykonanie umowy.</dd>
-          </div>
-          <div>
-            <dt>
-              Ochrona formularza przed spamem i&nbsp;nadużyciami (do tego służy adres IP dołączany do wiadomości)
-            </dt>
-            <dd>
-              {art('f')}: mój prawnie uzasadniony interes, czyli bezpieczeństwo strony
-              i&nbsp;skrzynki <span class="nowrap">e-mail</span>.
-            </dd>
-          </div>
-          <div>
-            <dt>Archiwizacja korespondencji</dt>
-            <dd>{art('f')}: mój prawnie uzasadniony interes, czyli zapis tego, co ustaliliśmy.</dd>
-          </div>
-          <div>
-            <dt>Ustalenie, dochodzenie i&nbsp;obrona roszczeń związanych z&nbsp;umową</dt>
-            <dd>{art('f')}: mój prawnie uzasadniony interes.</dd>
-          </div>
-          <div>
-            <dt>Księgowość i&nbsp;podatki po zawarciu umowy</dt>
-            <dd>{art('c')}: obowiązek wynikający z&nbsp;przepisów podatkowych i&nbsp;o&nbsp;rachunkowości.</dd>
-          </div>
-        </dl>
-        <p>
-          Jeśli piszesz w&nbsp;imieniu firmy lub instytucji, w&nbsp;której pracujesz, podstawą jest mój prawnie
-          uzasadniony interes ({art('f')}). Chodzi o&nbsp;to, żeby odpowiedzieć tej firmie i&nbsp;z&nbsp;nią współpracować.
-        </p>
-      </section>
+        <section class="part" aria-labelledby="cele">
+          <h2 id="cele">{heading('cele')}</h2>
+          <dl class="rows">
+            <div>
+              <dt>Odpowiedź na zapytanie i&nbsp;przygotowanie oferty</dt>
+              <dd>{art('b')}: działania przed zawarciem umowy, podejmowane na Twoją prośbę.</dd>
+            </div>
+            <div>
+              <dt>Zawarcie i&nbsp;wykonanie umowy, jeśli przyjmiesz ofertę</dt>
+              <dd>{art('b')}: wykonanie umowy.</dd>
+            </div>
+            <div>
+              <dt>
+                Ochrona formularza przed spamem i&nbsp;nadużyciami (do tego służy adres IP dołączany do wiadomości)
+              </dt>
+              <dd>
+                {art('f')}: mój prawnie uzasadniony interes, czyli bezpieczeństwo strony
+                i&nbsp;skrzynki <span class="nowrap">e-mail</span>.
+              </dd>
+            </div>
+            <div>
+              <dt>Archiwizacja korespondencji</dt>
+              <dd>{art('f')}: mój prawnie uzasadniony interes, czyli zapis tego, co ustaliliśmy.</dd>
+            </div>
+            <div>
+              <dt>Ustalenie, dochodzenie i&nbsp;obrona roszczeń związanych z&nbsp;umową</dt>
+              <dd>{art('f')}: mój prawnie uzasadniony interes.</dd>
+            </div>
+            <div>
+              <dt>Księgowość i&nbsp;podatki po zawarciu umowy</dt>
+              <dd>{art('c')}: obowiązek wynikający z&nbsp;przepisów podatkowych i&nbsp;o&nbsp;rachunkowości.</dd>
+            </div>
+          </dl>
+          <p>
+            Jeśli piszesz w&nbsp;imieniu firmy lub instytucji, w&nbsp;której pracujesz, podstawą jest mój prawnie
+            uzasadniony interes ({art('f')}). Chodzi o&nbsp;to, żeby odpowiedzieć tej firmie i&nbsp;z&nbsp;nią współpracować.
+          </p>
+        </section>
 
-      <section class="part" aria-labelledby="odbiorcy">
-        <h2 id="odbiorcy">{heading('odbiorcy')}</h2>
-        <p>Dane przekazuję tylko tym odbiorcom i&nbsp;tylko w&nbsp;zakresie, w&nbsp;jakim to potrzebne:</p>
-        <dl class="rows">
-          <div>
-            <dt>Vercel Inc.</dt>
-            <dd>Hosting tej strony i&nbsp;obsługa formularza kontaktowego. Vercel prowadzi też logi serwera.</dd>
-          </div>
-          <div>
-            <dt>Resend</dt>
-            <dd>Wysyłka wiadomości z&nbsp;formularza na moją skrzynkę <span class="nowrap">e-mail</span>.</dd>
-          </div>
-          <div>
-            <dt>Dostawca mojej skrzynki <span class="nowrap">e-mail</span></dt>
-            <dd>Przechowuje korespondencję, także wiadomości z&nbsp;formularza.</dd>
-          </div>
-        </dl>
-      </section>
+        <section class="part" aria-labelledby="odbiorcy">
+          <h2 id="odbiorcy">{heading('odbiorcy')}</h2>
+          <p>Dane przekazuję tylko tym odbiorcom i&nbsp;tylko w&nbsp;zakresie, w&nbsp;jakim to potrzebne:</p>
+          <dl class="rows">
+            <div>
+              <dt>Vercel Inc.</dt>
+              <dd>Hosting tej strony i&nbsp;obsługa formularza kontaktowego. Vercel prowadzi też logi serwera.</dd>
+            </div>
+            <div>
+              <dt>Resend</dt>
+              <dd>Wysyłka wiadomości z&nbsp;formularza na moją skrzynkę <span class="nowrap">e-mail</span>.</dd>
+            </div>
+            <div>
+              <dt>Dostawca mojej skrzynki <span class="nowrap">e-mail</span></dt>
+              <dd>Przechowuje korespondencję, także wiadomości z&nbsp;formularza.</dd>
+            </div>
+          </dl>
+        </section>
 
-      <section class="part" aria-labelledby="poza-eog">
-        <h2 id="poza-eog">{heading('poza-eog')}</h2>
-        <p>
-          Vercel i&nbsp;Resend to firmy z&nbsp;USA, więc dane z&nbsp;formularza i&nbsp;logi serwera mogą trafić poza
-          Europejski Obszar Gospodarczy (EOG).
-        </p>
-        <p>
-          Przekazuję je na podstawie decyzji Komisji Europejskiej stwierdzającej odpowiedni stopień ochrony danych
-          (<span class="nowrap">EU-US</span> Data Privacy Framework), jeśli odbiorca jest nią objęty. Jeśli nie jest, podstawą są standardowe
-          klauzule umowne przyjęte przez Komisję Europejską.
-        </p>
-        <p>
-          Kopię tych zabezpieczeń dostaniesz, jeśli napiszesz na <a href={`mailto:${contact.email}`}>{contact.email}</a>.
-          Listę firm objętych Data Privacy Framework znajdziesz
-          na stronie <a href="https://www.dataprivacyframework.gov/list">dataprivacyframework.gov</a>.
-        </p>
-      </section>
+        <section class="part" aria-labelledby="poza-eog">
+          <h2 id="poza-eog">{heading('poza-eog')}</h2>
+          <p>
+            Vercel i&nbsp;Resend to firmy z&nbsp;USA, więc dane z&nbsp;formularza i&nbsp;logi serwera mogą trafić poza
+            Europejski Obszar Gospodarczy (EOG).
+          </p>
+          <p>
+            Przekazuję je na podstawie decyzji Komisji Europejskiej stwierdzającej odpowiedni stopień ochrony danych
+            (<span class="nowrap">EU-US</span> Data Privacy Framework), jeśli odbiorca jest nią objęty. Jeśli nie jest, podstawą są standardowe
+            klauzule umowne przyjęte przez Komisję Europejską.
+          </p>
+          <p>
+            Kopię tych zabezpieczeń dostaniesz, jeśli napiszesz na <a href={`mailto:${contact.email}`}>{contact.email}</a>.
+            Listę firm objętych Data Privacy Framework znajdziesz
+            na stronie <a href="https://www.dataprivacyframework.gov/list">dataprivacyframework.gov</a>.
+          </p>
+        </section>
 
-      <section class="part" aria-labelledby="okres">
-        <h2 id="okres">{heading('okres')}</h2>
-        <dl class="rows">
-          <div>
-            <dt>Zapytanie, po którym nie zawieramy umowy</dt>
-            <dd>Do zakończenia sprawy, której dotyczy zapytanie. Potem usuwam korespondencję.</dd>
-          </div>
-          <div>
-            <dt>Po zawarciu umowy</dt>
-            <dd>
-              Przez czas trwania umowy, a&nbsp;potem do upływu terminów przedawnienia roszczeń i&nbsp;okresów, przez które
-              przepisy podatkowe każą przechowywać dokumenty.
-            </dd>
-          </div>
-          <div>
-            <dt>Adres IP dołączony do wiadomości</dt>
-            <dd>Tak długo, jak przechowuję wiadomość, do której go dołączono.</dd>
-          </div>
-          <div>
-            <dt>Logi serwera</dt>
-            <dd>
-              Przechowuje je Vercel przez okres, który sam ustala. Więcej informacji jest w&nbsp;polityce prywatności
-              Vercel: <a href="https://vercel.com/legal/privacy-policy">vercel.com/legal/privacy-policy</a>.
-            </dd>
-          </div>
-        </dl>
-        <p>
-          Jeśli poprosisz o&nbsp;usunięcie danych albo skutecznie zgłosisz sprzeciw, usunę je wcześniej, o&nbsp;ile
-          przepisy nie każą ich zachować.
-        </p>
-      </section>
+        <section class="part" aria-labelledby="okres">
+          <h2 id="okres">{heading('okres')}</h2>
+          <dl class="rows">
+            <div>
+              <dt>Zapytanie, po którym nie zawieramy umowy</dt>
+              <dd>Do zakończenia sprawy, której dotyczy zapytanie. Potem usuwam korespondencję.</dd>
+            </div>
+            <div>
+              <dt>Po zawarciu umowy</dt>
+              <dd>
+                Przez czas trwania umowy, a&nbsp;potem do upływu terminów przedawnienia roszczeń i&nbsp;okresów, przez które
+                przepisy podatkowe każą przechowywać dokumenty.
+              </dd>
+            </div>
+            <div>
+              <dt>Adres IP dołączony do wiadomości</dt>
+              <dd>Tak długo, jak przechowuję wiadomość, do której go dołączono.</dd>
+            </div>
+            <div>
+              <dt>Logi serwera</dt>
+              <dd>
+                Przechowuje je Vercel przez okres, który sam ustala. Więcej informacji jest w&nbsp;polityce prywatności
+                Vercel: <a href="https://vercel.com/legal/privacy-policy">vercel.com/legal/privacy-policy</a>.
+              </dd>
+            </div>
+          </dl>
+          <p>
+            Jeśli poprosisz o&nbsp;usunięcie danych albo skutecznie zgłosisz sprzeciw, usunę je wcześniej, o&nbsp;ile
+            przepisy nie każą ich zachować.
+          </p>
+        </section>
 
-      <section class="part" aria-labelledby="prawa">
-        <h2 id="prawa">{heading('prawa')}</h2>
-        <p>Masz prawo do:</p>
-        <ul class="rights">
-          <li><strong>dostępu do danych</strong>: możesz zapytać, jakie dane o&nbsp;Tobie mam, i&nbsp;dostać ich kopię;</li>
-          <li><strong>sprostowania</strong>: poprawię dane, które są błędne albo niepełne;</li>
-          <li>
-            <strong>usunięcia</strong>: usunę dane, jeśli nie są już potrzebne albo nie ma podstawy, żeby je
-            przetwarzać;
-          </li>
-          <li>
-            <strong>ograniczenia przetwarzania</strong>: na przykład na czas, gdy sprawdzam, czy dane są poprawne;
-          </li>
-          <li>
-            <strong>przenoszenia danych</strong>: dostaniesz dane podane w&nbsp;związku z&nbsp;zapytaniem lub umową
-            w&nbsp;popularnym formacie pliku albo przekażę je wskazanemu przez Ciebie administratorowi;
-          </li>
-          <li>
-            <strong>sprzeciwu</strong> wobec przetwarzania na podstawie prawnie uzasadnionego interesu ({art('f')}). Po
-            sprzeciwie przestanę przetwarzać dane, chyba że wykażę ważne, prawnie uzasadnione podstawy, nadrzędne wobec
-            Twoich interesów, praw i&nbsp;wolności, albo dane będą potrzebne do ustalenia, dochodzenia lub obrony
-            roszczeń.
-          </li>
-        </ul>
-        <p>
-          Żeby skorzystać z&nbsp;tych praw, napisz na <a href={`mailto:${contact.email}`}>{contact.email}</a> albo
-          zadzwoń: <a class="nowrap" href={contact.phoneHref}>{contact.phone}</a>. Odpowiem bez zbędnej zwłoki,
-          najpóźniej w&nbsp;ciągu miesiąca.
-        </p>
-        <p>
-          Jeśli uważasz, że przetwarzam Twoje dane niezgodnie z&nbsp;prawem, możesz złożyć skargę do Prezesa Urzędu
-          Ochrony Danych Osobowych, ul.&nbsp;Stawki&nbsp;2, <span class="nowrap">00-193&nbsp;Warszawa</span> (<a href="https://uodo.gov.pl/">uodo.gov.pl</a>).
-        </p>
-      </section>
+        <section class="part" aria-labelledby="prawa">
+          <h2 id="prawa">{heading('prawa')}</h2>
+          <p>Masz prawo do:</p>
+          <ul class="rights">
+            <li><strong>dostępu do danych</strong>: możesz zapytać, jakie dane o&nbsp;Tobie mam, i&nbsp;dostać ich kopię;</li>
+            <li><strong>sprostowania</strong>: poprawię dane, które są błędne albo niepełne;</li>
+            <li>
+              <strong>usunięcia</strong>: usunę dane, jeśli nie są już potrzebne albo nie ma podstawy, żeby je
+              przetwarzać;
+            </li>
+            <li>
+              <strong>ograniczenia przetwarzania</strong>: na przykład na czas, gdy sprawdzam, czy dane są poprawne;
+            </li>
+            <li>
+              <strong>przenoszenia danych</strong>: dostaniesz dane podane w&nbsp;związku z&nbsp;zapytaniem lub umową
+              w&nbsp;popularnym formacie pliku albo przekażę je wskazanemu przez Ciebie administratorowi;
+            </li>
+            <li>
+              <strong>sprzeciwu</strong> wobec przetwarzania na podstawie prawnie uzasadnionego interesu ({art('f')}). Po
+              sprzeciwie przestanę przetwarzać dane, chyba że wykażę ważne, prawnie uzasadnione podstawy, nadrzędne wobec
+              Twoich interesów, praw i&nbsp;wolności, albo dane będą potrzebne do ustalenia, dochodzenia lub obrony
+              roszczeń.
+            </li>
+          </ul>
+          <p>
+            Żeby skorzystać z&nbsp;tych praw, napisz na <a href={`mailto:${contact.email}`}>{contact.email}</a> albo
+            zadzwoń: <a class="nowrap" href={contact.phoneHref}>{contact.phone}</a>. Odpowiem bez zbędnej zwłoki,
+            najpóźniej w&nbsp;ciągu miesiąca.
+          </p>
+          <p>
+            Jeśli uważasz, że przetwarzam Twoje dane niezgodnie z&nbsp;prawem, możesz złożyć skargę do Prezesa Urzędu
+            Ochrony Danych Osobowych, ul.&nbsp;Stawki&nbsp;2, <span class="nowrap">00-193&nbsp;Warszawa</span> (<a href="https://uodo.gov.pl/">uodo.gov.pl</a>).
+          </p>
+        </section>
 
-      <section class="part" aria-labelledby="dobrowolnosc">
-        <h2 id="dobrowolnosc">{heading('dobrowolnosc')}</h2>
-        <p>
-          Podanie danych jest dobrowolne. Bez danych kontaktowych nie mogę jednak odpowiedzieć na zapytanie ani
-          przygotować oferty. Po zawarciu umowy dane do faktury są wymagane przez przepisy podatkowe.
-        </p>
-      </section>
+        <section class="part" aria-labelledby="dobrowolnosc">
+          <h2 id="dobrowolnosc">{heading('dobrowolnosc')}</h2>
+          <p>
+            Podanie danych jest dobrowolne. Bez danych kontaktowych nie mogę jednak odpowiedzieć na zapytanie ani
+            przygotować oferty. Po zawarciu umowy dane do faktury są wymagane przez przepisy podatkowe.
+          </p>
+        </section>
 
-      <section class="part" aria-labelledby="profilowanie">
-        <h2 id="profilowanie">{heading('profilowanie')}</h2>
-        <p>
-          Nie profiluję Cię i&nbsp;nie podejmuję wobec Ciebie decyzji opartych wyłącznie na zautomatyzowanym
-          przetwarzaniu danych. Na wiadomości odpowiadam osobiście.
-        </p>
-      </section>
+        <section class="part" aria-labelledby="profilowanie">
+          <h2 id="profilowanie">{heading('profilowanie')}</h2>
+          <p>
+            Nie profiluję Cię i&nbsp;nie podejmuję wobec Ciebie decyzji opartych wyłącznie na zautomatyzowanym
+            przetwarzaniu danych. Na wiadomości odpowiadam osobiście.
+          </p>
+        </section>
 
-      <section class="part" aria-labelledby="ciasteczka">
-        <h2 id="ciasteczka">{heading('ciasteczka')}</h2>
-        <p>
-          Ta strona nie używa ciasteczek (cookies) ani narzędzi analitycznych i&nbsp;śledzących. Dlatego nie ma tu
-          okienka z&nbsp;prośbą o&nbsp;zgodę na ciasteczka.
-        </p>
-        <p>
-          Serwery Vercel, na których działa strona, zapisują w&nbsp;logach podstawowe informacje o&nbsp;połączeniu: adres
-          IP, rodzaj przeglądarki i&nbsp;czas odwiedzin. Służą one bezpieczeństwu strony, na przykład wykrywaniu ataków
-          i&nbsp;nadużyć. Podstawą jest mój prawnie uzasadniony interes ({art('f')}).
-        </p>
-      </section>
+        <section class="part" aria-labelledby="ciasteczka">
+          <h2 id="ciasteczka">{heading('ciasteczka')}</h2>
+          <p>
+            Ta strona nie używa ciasteczek (cookies) ani narzędzi analitycznych i&nbsp;śledzących. Dlatego nie ma tu
+            okienka z&nbsp;prośbą o&nbsp;zgodę na ciasteczka.
+          </p>
+          <p>
+            Serwery Vercel, na których działa strona, zapisują w&nbsp;logach podstawowe informacje o&nbsp;połączeniu: adres
+            IP, rodzaj przeglądarki i&nbsp;czas odwiedzin. Służą one bezpieczeństwu strony, na przykład wykrywaniu ataków
+            i&nbsp;nadużyć. Podstawą jest mój prawnie uzasadniony interes ({art('f')}).
+          </p>
+        </section>
 
-      <section class="part" aria-labelledby="linki">
-        <h2 id="linki">{heading('linki')}</h2>
-        <p>
-          Przy realizacjach są linki do stron klientów: {projectDomains}. W&nbsp;stopce {footerLinksText},
-          a&nbsp;w&nbsp;tej polityce do uodo.gov.pl, vercel.com i&nbsp;dataprivacyframework.gov. Na tych stronach
-          obowiązują zasady prywatności ich właścicieli.
-        </p>
-      </section>
+        <section class="part" aria-labelledby="linki">
+          <h2 id="linki">{heading('linki')}</h2>
+          <p>
+            Przy realizacjach są linki do stron klientów: {projectDomains}. W&nbsp;stopce {footerLinksText},
+            a&nbsp;w&nbsp;tej polityce do uodo.gov.pl, vercel.com i&nbsp;dataprivacyframework.gov. Na tych stronach
+            obowiązują zasady prywatności ich właścicieli.
+          </p>
+        </section>
+      </div>
     </div>
   </article>
 </Base>
@@ -327,15 +329,14 @@ const heading = (id: (typeof toc)[number]['id']) => toc.find((item) => item.id =
   .policy {
     padding-top: clamp(2.5rem, 1.5rem + 4vw, 5rem);
     padding-bottom: 0;
-    /* --measure (66ch) daje w tym foncie ok. 100 znaków w wierszu, bo „ch” liczy się od szerokiej cyfry 0.
-       42ch to ok. 66 znaków; lead ma większy stopień pisma, więc węższy limit. */
+    /* --measure (30em) to szerokość części razem z tabelami „co – jak”. Tekst ciągły jest węższy:
+       42ch to w tym foncie do ok. 66 znaków w wierszu („ch” liczy się od szerokiej cyfry 0);
+       lead ma większy stopień pisma, więc węższy limit. */
     --text-measure: 42ch;
     --lead-measure: 38ch;
   }
 
-  .policy__head {
-    max-width: var(--measure);
-  }
+  /* Nagłówek bez limitu szerokości, żeby tytuł nie łamał się bez potrzeby; akapity mają własne limity niżej. */
   .policy__head h1 {
     margin-bottom: 0.3em;
   }
@@ -354,9 +355,9 @@ const heading = (id: (typeof toc)[number]['id']) => toc.find((item) => item.id =
     max-width: var(--text-measure);
   }
 
-  /* Spis treści: zwykła lista numerowana, na szerszym ekranie w dwóch kolumnach. */
+  /* Spis treści: zwykła lista numerowana, od 48rem w dwóch kolumnach, od 64rem w prawej kolumnie strony. */
   .toc {
-    max-width: var(--measure);
+    max-width: 48rem;
     margin-top: var(--space-l);
     padding-block: 1.25rem 1.5rem;
     border-top: 1px solid var(--line);
@@ -374,11 +375,48 @@ const heading = (id: (typeof toc)[number]['id']) => toc.find((item) => item.id =
   .toc li {
     padding-block: 0.2rem;
     break-inside: avoid;
+    /* Dwuwierszowa pozycja łamie się po równo, bez jednego wiszącego słowa („EOG”, „danych”). */
+    text-wrap: balance;
   }
   @media (min-width: 48rem) {
     .toc ol {
       columns: 2;
       column-gap: 3rem;
+    }
+  }
+
+  /* Od 64rem: tekst w lewej kolumnie, spis treści obok, w wolnym miejscu po prawej.
+     W kodzie spis zostaje przed treścią, więc kolejność czytania i przechodzenia klawiszem Tab się nie zmienia. */
+  @media (min-width: 64rem) {
+    .policy__layout {
+      display: grid;
+      grid-template-columns: minmax(0, var(--measure)) minmax(0, 20rem);
+      justify-content: space-between;
+      /* Odstęp pod nagłówkiem taki sam jak na węższym ekranie (margines .toc). */
+      gap: var(--space-l) 4rem;
+    }
+    .policy__head {
+      grid-column: 1 / -1;
+    }
+    .policy__body {
+      grid-column: 1;
+      grid-row: 2;
+    }
+    .toc {
+      grid-column: 2;
+      grid-row: 2;
+      align-self: start;
+      margin-top: 0;
+    }
+    .toc ol {
+      columns: auto;
+    }
+  }
+  /* Spis zostaje na ekranie przy przewijaniu tylko wtedy, gdy mieści się w oknie w całości. */
+  @media (min-width: 64rem) and (min-height: 40rem) {
+    .toc {
+      position: sticky;
+      top: 1.5rem;
     }
   }
 

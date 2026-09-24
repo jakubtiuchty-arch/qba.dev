@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /instagram-templates/
 
 Sitemap: https://qba.dev/sitemap-index.xml
