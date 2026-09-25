@@ -8,6 +8,8 @@ const courtParts = company.court.split(/(\S+-\S+)/);
 const year = new Date().getFullYear();
 const current = Astro.url.pathname;
 const isErrorPage = current.startsWith('/404');
+// Wagę wpisuje integracja page-weight po buildzie; w `astro dev` buildu nie ma, więc pokazujemy opis zamiast znacznika.
+const weightLabel = import.meta.env.DEV ? '[waga liczona przy buildzie]' : '__PAGE_WEIGHT__';
 const pageSpeedUrl = `https://pagespeed.web.dev/analysis?url=${encodeURIComponent(new URL(Astro.url.pathname, site.url).href)}`;
 const profileLinks = [
   profiles.googleBusiness && { href: profiles.googleBusiness, label: 'Profil w Google' },
@@ -53,7 +55,7 @@ const profileLinks = [
   <div class="container bottom">
     <p>© {year} {site.brand} · {company.name}</p>
     <p data-page-weight>
-      Ta strona waży <span data-page-weight-value>__PAGE_WEIGHT__</span> razem z fontami i zdjęciami. Nie używa ciasteczek
+      Ta strona waży <span data-page-weight-value>{weightLabel}</span> razem z fontami i zdjęciami. Nie używa ciasteczek
       ani skryptów śledzących.{!isErrorPage && <> <a href={pageSpeedUrl}>Sprawdź w PageSpeed Insights</a>.</>}
     </p>
   </div>
