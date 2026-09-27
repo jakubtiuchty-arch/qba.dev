@@ -1,870 +1,294 @@
-/**
- * qba.dev - Senior Frontend Developer
- * Landing Page JavaScript
- */
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize all components
-    initCursorGlow();
-    initNavbar();
-    initMobileMenu();
-    initSmoothScroll();
-    initCounterAnimation();
-    initScrollAnimations();
-    initContactForm();
-    initTypingEffect();
-    initPortfolioModal();
-    initCookieBanner();
-});
-
-/**
- * Custom cursor glow effect
- */
-function initCursorGlow() {
-    const cursorGlow = document.getElementById('cursor-glow');
-    if (!cursorGlow) return;
-
-    // Only enable on desktop
-    if (window.innerWidth < 768) {
-        cursorGlow.style.display = 'none';
-        return;
-    }
-
-    let mouseX = 0;
-    let mouseY = 0;
-    let currentX = 0;
-    let currentY = 0;
-
-    document.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-    });
-
-    function animateCursor() {
-        // Smooth follow effect
-        currentX += (mouseX - currentX) * 0.1;
-        currentY += (mouseY - currentY) * 0.1;
-
-        cursorGlow.style.left = currentX + 'px';
-        cursorGlow.style.top = currentY + 'px';
-
-        requestAnimationFrame(animateCursor);
-    }
-
-    animateCursor();
-}
-
-/**
- * Navbar scroll effect
- */
-function initNavbar() {
-    const navbar = document.getElementById('navbar');
-    if (!navbar) return;
-
-    function handleScroll() {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-        if (scrollTop > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Initial check
-}
-
-/**
- * Mobile menu toggle
- */
-function initMobileMenu() {
-    const hamburger = document.getElementById('hamburger');
-    const navMenu = document.getElementById('nav-menu');
-    const navLinks = document.querySelectorAll('.nav-link');
-
-    if (!hamburger || !navMenu) return;
-
-    hamburger.addEventListener('click', function() {
-        hamburger.classList.toggle('active');
-        navMenu.classList.toggle('active');
-        document.body.style.overflow = navMenu.classList.contains('active') ? 'hidden' : '';
-    });
-
-    // Close menu when clicking a link
-    navLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-    });
-
-    // Close menu on outside click
-    document.addEventListener('click', function(e) {
-        if (!hamburger.contains(e.target) && !navMenu.contains(e.target)) {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-    });
-}
-
-/**
- * Smooth scrolling for anchor links
- */
-function initSmoothScroll() {
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            e.preventDefault();
-            const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
-
-            const target = document.querySelector(targetId);
-            if (target) {
-                const headerOffset = 80;
-                const elementPosition = target.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
-}
-
-/**
- * Counter animation for statistics
- */
-function initCounterAnimation() {
-    const counters = document.querySelectorAll('.stat-number');
-    if (counters.length === 0) return;
-
-    const duration = 2000; // 2 seconds
-    let animated = false;
-
-    function easeOutQuart(t) {
-        return 1 - Math.pow(1 - t, 4);
-    }
-
-    function animateCounter(counter) {
-        const target = parseInt(counter.getAttribute('data-target'));
-        const startTime = performance.now();
-
-        function updateCounter(currentTime) {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const easedProgress = easeOutQuart(progress);
-            const currentValue = Math.floor(easedProgress * target);
-
-            counter.textContent = currentValue;
-
-            if (progress < 1) {
-                requestAnimationFrame(updateCounter);
-            } else {
-                counter.textContent = target;
-            }
-        }
-
-        requestAnimationFrame(updateCounter);
-    }
-
-    // Trigger animation when stats section is visible
-    const statsSection = document.querySelector('.hero-stats');
-    if (statsSection) {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !animated) {
-                    animated = true;
-                    counters.forEach(counter => animateCounter(counter));
-                }
-            });
-        }, { threshold: 0.5 });
-
-        observer.observe(statsSection);
-    }
-}
-
-/**
- * Scroll animations using Intersection Observer
- */
-function initScrollAnimations() {
-    const animatedElements = document.querySelectorAll(
-        '.service-card, .process-step, .pricing-card, .tech-category, .problem-item, .guarantee-card, .about-card, .about-quote, .portfolio-item'
-    );
-
-    if (animatedElements.length === 0) return;
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry, index) => {
-            if (entry.isIntersecting) {
-                // Add staggered delay based on element index within its container
-                setTimeout(() => {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }, index * 50);
-
-                observer.unobserve(entry.target);
-            }
-        });
-    }, {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    });
-
-    animatedElements.forEach((el) => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-    });
-
-    // Section headers animation
-    const sectionHeaders = document.querySelectorAll('.section-header, .contact-info, .solution-content, .problem-content');
-    const headerObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-                headerObserver.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.2 });
-
-    sectionHeaders.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-        headerObserver.observe(el);
-    });
-}
-
-/**
- * Contact form handling
- */
-function initContactForm() {
-    const form = document.getElementById('contact-form');
-    if (!form) return;
-
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        // Get form data
-        const formData = new FormData(form);
-        const data = {};
-        formData.forEach((value, key) => {
-            data[key] = value;
-        });
-
-        // Basic validation
-        if (!data.name || !data.email || !data.message) {
-            showNotification('Proszę wypełnić wymagane pola', 'error');
-            return;
-        }
-
-        if (!isValidEmail(data.email)) {
-            showNotification('Proszę podać poprawny adres email', 'error');
-            return;
-        }
-
-        // Send form via API
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<span>Wysyłanie...</span>';
-        submitBtn.disabled = true;
-        submitBtn.style.opacity = '0.7';
-
-        try {
-            const response = await fetch('/api/contact', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                showNotification('Dziękuję! Wiadomość została wysłana. Odezwę się w ciągu 24h.', 'success');
-                form.reset();
-            } else {
-                showNotification(result.error || 'Błąd wysyłania. Spróbuj ponownie.', 'error');
-            }
-        } catch (error) {
-            console.error('Form error:', error);
-            showNotification('Błąd połączenia. Spróbuj ponownie.', 'error');
-        }
-
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-        submitBtn.style.opacity = '1';
-    });
-}
-
-/**
- * Email validation helper
- */
-function isValidEmail(email) {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-}
-
-/**
- * Show notification
- */
-function showNotification(message, type = 'success') {
-    // Remove existing notification
-    const existing = document.querySelector('.notification');
-    if (existing) existing.remove();
-
-    // Create notification element
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.innerHTML = `
-        <span>${message}</span>
-        <button class="notification-close">&times;</button>
-    `;
-
-    // Add styles
-    const bgColor = type === 'success'
-        ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-        : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
-
-    notification.style.cssText = `
-        position: fixed;
-        top: 100px;
-        right: 20px;
-        padding: 20px 30px;
-        background: ${bgColor};
-        color: white;
-        border-radius: 12px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-        z-index: 10000;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        animation: slideIn 0.3s ease forwards;
-        font-family: var(--font-body);
-        max-width: 90%;
-    `;
-
-    // Add animation keyframes
-    if (!document.querySelector('#notification-styles')) {
-        const style = document.createElement('style');
-        style.id = 'notification-styles';
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOut {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
-    document.body.appendChild(notification);
-
-    // Close button handler
-    const closeBtn = notification.querySelector('.notification-close');
-    closeBtn.style.cssText = `
-        background: rgba(255, 255, 255, 0.2);
-        border: none;
-        color: white;
-        font-size: 20px;
-        cursor: pointer;
-        padding: 5px 10px;
-        line-height: 1;
-        border-radius: 6px;
-        transition: background 0.2s;
-    `;
-
-    closeBtn.addEventListener('mouseenter', () => {
-        closeBtn.style.background = 'rgba(255, 255, 255, 0.3)';
-    });
-
-    closeBtn.addEventListener('mouseleave', () => {
-        closeBtn.style.background = 'rgba(255, 255, 255, 0.2)';
-    });
-
-    closeBtn.addEventListener('click', () => {
-        notification.style.animation = 'slideOut 0.3s ease forwards';
-        setTimeout(() => notification.remove(), 300);
-    });
-
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (notification.parentElement) {
-            notification.style.animation = 'slideOut 0.3s ease forwards';
-            setTimeout(() => notification.remove(), 300);
-        }
-    }, 5000);
-}
-
-/**
- * Typing effect for floating code snippets (optional enhancement)
- */
-function initTypingEffect() {
-    // Add subtle pulsing to floating code
-    const floatingCodes = document.querySelectorAll('.floating-code');
-    floatingCodes.forEach(code => {
-        code.addEventListener('mouseenter', () => {
-            code.style.transform = 'scale(1.05)';
-            code.style.boxShadow = '0 20px 60px rgba(99, 102, 241, 0.3)';
-        });
-        code.addEventListener('mouseleave', () => {
-            code.style.transform = '';
-            code.style.boxShadow = '';
-        });
-    });
-}
-
-/**
- * Active navigation link highlight
- */
-function initActiveNavigation() {
-    const sections = document.querySelectorAll('section[id]');
-    const navLinks = document.querySelectorAll('.nav-link:not(.nav-cta)');
-
-    function highlightNav() {
-        const scrollPos = window.scrollY + 150;
-
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.offsetHeight;
-            const sectionId = section.getAttribute('id');
-
-            if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
-                navLinks.forEach(link => {
-                    link.style.color = '';
-                    if (link.getAttribute('href') === `#${sectionId}`) {
-                        link.style.color = '#6366f1';
-                    }
-                });
-            }
-        });
-    }
-
-    window.addEventListener('scroll', highlightNav, { passive: true });
-    highlightNav();
-}
-
-// Initialize active navigation
-initActiveNavigation();
-
-/**
- * Parallax effect on hero glows
- */
-function initParallax() {
-    const glows = document.querySelectorAll('.hero-glow');
-
-    window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        if (scrolled < window.innerHeight) {
-            glows.forEach((glow, index) => {
-                const speed = index === 0 ? 0.3 : 0.2;
-                glow.style.transform = `translateY(${scrolled * speed}px)`;
-            });
-        }
+// qba.dev: plansza „portfolio w przygotowaniu”
+
+(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const fine = window.matchMedia('(pointer: fine)').matches;
+
+    // Wejście elementów
+    requestAnimationFrame(() => document.body.classList.add('is-ready'));
+
+    // Zegar czasu lokalnego (Trzebnica)
+    const clock = document.getElementById('clock');
+    const fmt = new Intl.DateTimeFormat('pl-PL', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Warsaw' });
+    const tick = () => { clock.textContent = fmt.format(new Date()); };
+    tick();
+    setInterval(tick, 10000);
+
+    // Kursor: wspólny stan dla kuli, przycisku i tła
+    const mouse = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5 };
+    window.addEventListener('pointermove', (e) => {
+        mouse.tx = e.clientX / window.innerWidth;
+        mouse.ty = e.clientY / window.innerHeight;
     }, { passive: true });
-}
 
-initParallax();
+    // Przyciski kontaktu lekko przyciągają się do kursora
+    const magnets = [...document.querySelectorAll('[data-magnet]')].map((el) => ({ el, x: 0, y: 0, tx: 0, ty: 0 }));
 
-/**
- * Button hover effects enhancement
- */
-function initButtonEffects() {
-    const buttons = document.querySelectorAll('.btn-primary');
-
-    buttons.forEach(btn => {
-        btn.addEventListener('mousemove', (e) => {
-            const rect = btn.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            btn.style.setProperty('--mouse-x', `${x}px`);
-            btn.style.setProperty('--mouse-y', `${y}px`);
-        });
-    });
-}
-
-initButtonEffects();
-
-/**
- * Preloader (optional)
- */
-window.addEventListener('load', function() {
-    document.body.classList.add('loaded');
-
-    // Trigger initial animations
-    const heroContent = document.querySelector('.hero-content');
-    if (heroContent) {
-        heroContent.style.opacity = '1';
+    if (fine && !reduced) {
+        for (const m of magnets) {
+            m.el.addEventListener('pointermove', (e) => {
+                const r = m.el.getBoundingClientRect();
+                m.tx = (e.clientX - (r.left + r.width / 2)) * 0.12;
+                m.ty = (e.clientY - (r.top + r.height / 2)) * 0.25;
+            });
+            m.el.addEventListener('pointerleave', () => { m.tx = 0; m.ty = 0; });
+        }
     }
-});
 
-/**
- * Pricing card hover effect
- */
-function initPricingEffects() {
-    const pricingCards = document.querySelectorAll('.pricing-card:not(.pricing-card-featured)');
+    const loop = () => {
+        mouse.x += (mouse.tx - mouse.x) * 0.06;
+        mouse.y += (mouse.ty - mouse.y) * 0.06;
+        if (fine && !reduced) {
+            for (const m of magnets) {
+                m.x += (m.tx - m.x) * 0.15;
+                m.y += (m.ty - m.y) * 0.15;
+                m.el.style.transform = `translate3d(${m.x}px, ${m.y}px, 0)`;
+            }
+        }
+        requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
 
-    pricingCards.forEach(card => {
-        card.addEventListener('mouseenter', () => {
-            pricingCards.forEach(c => {
-                if (c !== card) {
-                    c.style.opacity = '0.7';
-                }
-            });
+    // Sfera z cząsteczek: kursor je rozprasza, sprężyny ściągają z powrotem
+    (() => {
+        const cv = document.getElementById('dots');
+        const ctx = cv.getContext('2d');
+        if (!ctx) return;
+
+        const small = window.innerWidth < 700;
+        const N = small ? 900 : 1700;
+        const pts = [];
+        const golden = Math.PI * (3 - Math.sqrt(5));
+        for (let i = 0; i < N; i++) {
+            const y = 1 - (i / (N - 1)) * 2;
+            const r = Math.sqrt(1 - y * y);
+            const th = golden * i;
+            pts.push({ x: Math.cos(th) * r, y, z: Math.sin(th) * r, px: 0, py: 0, vx: 0, vy: 0, init: false });
+        }
+
+        // Kolory od tyłu (jasny liliowy) do przodu (głęboki fiolet)
+        const BINS = 10;
+        const from = [196, 184, 255], to = [70, 48, 190];
+        const colors = Array.from({ length: BINS }, (_, i) => {
+            const t = i / (BINS - 1);
+            const c = from.map((v, k) => Math.round(v + (to[k] - v) * t));
+            return `rgba(${c[0]},${c[1]},${c[2]},${(0.28 + t * 0.62).toFixed(2)})`;
         });
+        const buckets = Array.from({ length: BINS }, () => []);
 
-        card.addEventListener('mouseleave', () => {
-            pricingCards.forEach(c => {
-                c.style.opacity = '1';
-            });
-        });
-    });
-}
+        let W = 0, H = 0, dpr = 1, R = 0, rect = null;
+        const size = () => {
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            rect = cv.getBoundingClientRect();
+            W = cv.width = Math.round(rect.width * dpr);
+            H = cv.height = Math.round(rect.height * dpr);
+            R = (W / 1.6) * 0.37; // płótno = 160% sfery; z perspektywą obrys ok. 0.44 sfery
+        };
+        size();
+        window.addEventListener('resize', size);
+        window.addEventListener('scroll', () => { rect = cv.getBoundingClientRect(); }, { passive: true });
 
-initPricingEffects();
-
-/**
- * Pricing addons toggle (iOS-style)
- */
-function initPricingAddons() {
-    const checkboxes = document.querySelectorAll('.addons-checkbox');
-
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            const wrapper = checkbox.closest('.addons-toggle-wrapper');
-            const addonsList = wrapper.nextElementSibling;
-
-            if (checkbox.checked) {
-                addonsList.classList.add('active');
-            } else {
-                addonsList.classList.remove('active');
+        const p = { x: -9999, y: -9999, lx: -9999, ly: -9999, speed: 0, active: false };
+        const toLocal = (e) => {
+            p.x = (e.clientX - rect.left) * dpr;
+            p.y = (e.clientY - rect.top) * dpr;
+        };
+        window.addEventListener('pointermove', (e) => { toLocal(e); p.active = true; }, { passive: true });
+        document.addEventListener('pointerleave', () => { p.active = false; });
+        cv.addEventListener('pointerdown', (e) => {
+            toLocal(e);
+            // kliknięcie: mocne rozrzucenie wokół punktu
+            for (const q of pts) {
+                const dx = q.px - p.x, dy = q.py - p.y;
+                const d = Math.hypot(dx, dy) || 1;
+                const f = Math.max(0, 1 - d / (R * 1.4)) * 38 * dpr;
+                q.vx += (dx / d) * f;
+                q.vy += (dy / d) * f;
             }
         });
-    });
-}
 
-initPricingAddons();
+        let angle = 0;
+        const frame = () => {
+            angle += reduced ? 0 : 0.0028;
+            const tilt = 0.38 + (mouse.y - 0.5) * 0.5;
+            const yaw = angle + (mouse.x - 0.5) * 0.8;
+            const cy = Math.cos(yaw), sy = Math.sin(yaw);
+            const cx = Math.cos(tilt), sx = Math.sin(tilt);
+            const ox = W / 2, oy = H / 2;
 
-/**
- * Portfolio item hover effect
- */
-function initPortfolioEffects() {
-    const portfolioItems = document.querySelectorAll('.portfolio-item');
+            // prędkość kursora wzmacnia rozproszenie
+            const mv = Math.hypot(p.x - p.lx, p.y - p.ly);
+            p.speed += (Math.min(mv, 80 * dpr) - p.speed) * 0.25;
+            p.lx = p.x; p.ly = p.y;
+            const radius = R * 0.6;
+            const push = p.active ? (2.4 + p.speed / dpr * 0.45) * dpr : 0;
 
-    portfolioItems.forEach(item => {
-        const placeholder = item.querySelector('.placeholder-browser');
-        if (placeholder) {
-            item.addEventListener('mouseenter', () => {
-                placeholder.style.transform = 'scale(1.02)';
-                placeholder.style.transition = 'transform 0.4s ease';
-            });
+            for (const b of buckets) b.length = 0;
 
-            item.addEventListener('mouseleave', () => {
-                placeholder.style.transform = 'scale(1)';
-            });
+            for (const q of pts) {
+                const x1 = q.x * cy - q.z * sy;
+                const z1 = q.x * sy + q.z * cy;
+                const y2 = q.y * cx - z1 * sx;
+                const z2 = q.y * sx + z1 * cx;
+                const persp = 3.4 / (3.4 - z2 * 0.9);
+                const tx = ox + x1 * R * persp;
+                const ty = oy + y2 * R * persp;
+
+                if (!q.init) { q.px = tx; q.py = ty; q.init = true; }
+
+                if (push) {
+                    const dx = q.px - p.x, dy = q.py - p.y;
+                    const d2 = dx * dx + dy * dy;
+                    if (d2 < radius * radius) {
+                        const d = Math.sqrt(d2) || 1;
+                        const f = (1 - d / radius) ** 2 * push;
+                        q.vx += (dx / d) * f;
+                        q.vy += (dy / d) * f;
+                    }
+                }
+
+                q.vx += (tx - q.px) * 0.022;
+                q.vy += (ty - q.py) * 0.022;
+                q.vx *= 0.9;
+                q.vy *= 0.9;
+                q.px += q.vx;
+                q.py += q.vy;
+                q.z2 = z2;
+
+                const bin = Math.min(BINS - 1, Math.max(0, Math.floor((z2 + 1) / 2 * BINS)));
+                buckets[bin].push(q);
+            }
+
+            ctx.clearRect(0, 0, W, H);
+            for (let i = 0; i < BINS; i++) {
+                ctx.fillStyle = colors[i];
+                const s = (0.7 + (i / BINS) * 1.5) * dpr;
+                ctx.beginPath();
+                for (const q of buckets[i]) {
+                    ctx.moveTo(q.px + s, q.py);
+                    ctx.arc(q.px, q.py, s, 0, Math.PI * 2);
+                }
+                ctx.fill();
+            }
+
+            if (!reduced && !document.hidden) requestAnimationFrame(frame);
+        };
+        document.addEventListener('visibilitychange', () => { if (!document.hidden && !reduced) requestAnimationFrame(frame); });
+        requestAnimationFrame(frame);
+    })();
+
+    // Tło: perłowy „jedwab” w WebGL
+    const canvas = document.getElementById('silk');
+    const gl = canvas.getContext('webgl', { antialias: false, alpha: false, powerPreference: 'low-power' });
+    if (!gl) return;
+
+    const vert = `
+        attribute vec2 p;
+        void main() { gl_Position = vec4(p, 0.0, 1.0); }
+    `;
+
+    const frag = `
+        precision highp float;
+        uniform vec2 uRes;
+        uniform float uTime;
+        uniform vec2 uMouse;
+
+        float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+        float noise(vec2 p) {
+            vec2 i = floor(p), f = fract(p);
+            vec2 u = f * f * (3.0 - 2.0 * f);
+            return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
+                       mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
         }
-    });
-}
-
-initPortfolioEffects();
-
-/**
- * Form input focus effects
- */
-function initFormEffects() {
-    const formGroups = document.querySelectorAll('.form-group');
-
-    formGroups.forEach(group => {
-        const input = group.querySelector('input, select, textarea');
-        const label = group.querySelector('label');
-
-        if (input && label) {
-            input.addEventListener('focus', () => {
-                label.style.color = '#6366f1';
-            });
-
-            input.addEventListener('blur', () => {
-                label.style.color = '';
-            });
+        float fbm(vec2 p) {
+            float v = 0.0, a = 0.5;
+            mat2 r = mat2(0.8, -0.6, 0.6, 0.8);
+            for (int i = 0; i < 5; i++) { v += a * noise(p); p = r * p * 2.02; a *= 0.5; }
+            return v;
         }
-    });
-}
 
-initFormEffects();
+        void main() {
+            vec2 uv = gl_FragCoord.xy / uRes;
+            vec2 p = uv;
+            p.x *= uRes.x / uRes.y;
+            float t = uTime * 0.045;
 
-/**
- * Console Easter egg
- */
-console.log('%c qba.dev ', 'background: linear-gradient(135deg, #6366f1, #a855f7); color: white; font-size: 24px; padding: 10px 20px; border-radius: 8px; font-weight: bold;');
-console.log('%c Szukasz developera? Napisz do mnie! hello@qba.dev ', 'color: #6366f1; font-size: 14px;');
+            vec2 m = (uMouse - 0.5) * vec2(0.35, -0.35);
+            vec2 q = vec2(fbm(p * 1.4 + t), fbm(p * 1.4 - t + 3.1));
+            vec2 r = vec2(fbm(p * 1.2 + 2.2 * q + m + t * 0.8), fbm(p * 1.2 + 2.2 * q - m - t * 0.6 + 7.4));
+            float f = fbm(p * 1.1 + 2.6 * r);
 
-/**
- * Portfolio Showcase hover effect with mouse tracking
- */
-function initShowcaseEffects() {
-    const showcaseItems = document.querySelectorAll('.showcase-item');
+            vec3 pearl = vec3(0.953, 0.949, 0.973);
+            vec3 lilac = vec3(0.835, 0.800, 1.000);
+            vec3 ice   = vec3(0.820, 0.878, 1.000);
+            vec3 blush = vec3(0.965, 0.878, 0.957);
+            vec3 white = vec3(1.0);
 
-    showcaseItems.forEach(item => {
-        item.addEventListener('mousemove', (e) => {
-            const rect = item.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            vec3 col = pearl;
+            col = mix(col, lilac, smoothstep(0.35, 0.85, f) * 0.85);
+            col = mix(col, ice, smoothstep(0.3, 0.9, r.x) * 0.55);
+            col = mix(col, blush, smoothstep(0.55, 0.95, q.y) * 0.35);
 
-            item.style.setProperty('--mouse-x', `${x}px`);
-            item.style.setProperty('--mouse-y', `${y}px`);
-        });
-    });
-}
+            // połysk jedwabiu: cienkie jasne fałdy
+            float fold = pow(abs(sin((f + r.y) * 9.0 + t * 2.0)), 18.0);
+            col = mix(col, white, fold * 0.45);
 
-initShowcaseEffects();
+            // rozjaśnienie po lewej, żeby tekst był czytelny
+            col = mix(col, pearl, smoothstep(0.75, 0.0, uv.x) * 0.45);
 
-/**
- * Portfolio Modal functionality
- */
-function initPortfolioModal() {
-    const portfolioItems = document.querySelectorAll('.showcase-item[data-modal]');
-    const modal = document.getElementById('portfolio-modal');
-    const modalContent = document.getElementById('modal-content');
-    const modalUrl = document.getElementById('modal-url');
-    const modalClose = document.getElementById('modal-close');
-    const modalBackdrop = document.querySelector('.modal-backdrop');
-
-    if (!modal || portfolioItems.length === 0) return;
-
-    // Modal content templates
-    const modalTemplates = {
-        techstore: {
-            url: 'www.techstore.pl',
-            content: `
-                <div class="modal-page modal-techstore">
-                    <nav class="page-nav">
-                        <div class="page-logo">Tech<span>Store</span></div>
-                        <div class="page-nav-links">
-                            <span>Produkty</span>
-                            <span>Promocje</span>
-                            <span>O nas</span>
-                            <span>Kontakt</span>
-                        </div>
-                    </nav>
-                    <div class="page-hero">
-                        <div class="page-hero-content">
-                            <span class="page-badge">Nowość 2025</span>
-                            <h1>Słuchawki<br><span>ProMax Ultra</span></h1>
-                            <p>Zanurz się w dźwięku przyszłości. Aktywna redukcja szumów, 40h pracy na baterii, dźwięk Hi-Res Audio.</p>
-                            <span class="page-btn">Kup teraz - 899 zł</span>
-                        </div>
-                        <div class="page-hero-image"></div>
-                    </div>
-                    <div class="page-features">
-                        <div class="feature-card">
-                            <h3>Darmowa dostawa</h3>
-                            <p>Przy zamówieniach powyżej 200 zł</p>
-                        </div>
-                        <div class="feature-card">
-                            <h3>30 dni na zwrot</h3>
-                            <p>Bez pytań, pełny zwrot kosztów</p>
-                        </div>
-                        <div class="feature-card">
-                            <h3>2 lata gwarancji</h3>
-                            <p>Rozszerzona gwarancja producenta</p>
-                        </div>
-                    </div>
-                </div>
-            `
-        },
-        lawfirm: {
-            url: 'www.kowalski-partnerzy.pl',
-            content: `
-                <div class="modal-page modal-lawfirm">
-                    <nav class="page-nav">
-                        <div class="page-logo">Kowalski <span>&</span> Partnerzy</div>
-                        <div class="page-nav-links">
-                            <span>O kancelarii</span>
-                            <span>Usługi</span>
-                            <span>Zespół</span>
-                            <span>Kontakt</span>
-                        </div>
-                    </nav>
-                    <div class="page-hero">
-                        <span class="page-small">Kancelaria Prawna</span>
-                        <h1>Prawo w służbie Twojego biznesu</h1>
-                        <p>Od 15 lat pomagamy przedsiębiorcom w budowaniu bezpiecznych fundamentów prawnych. Specjalizujemy się w prawie gospodarczym, korporacyjnym i podatkowym.</p>
-                        <span class="page-btn">Bezpłatna konsultacja</span>
-                    </div>
-                    <div class="page-services">
-                        <div class="service-card">
-                            <h3>Prawo gospodarcze</h3>
-                            <p>Kompleksowa obsługa prawna firm i przedsiębiorców</p>
-                        </div>
-                        <div class="service-card">
-                            <h3>Prawo korporacyjne</h3>
-                            <p>Zakładanie spółek, fuzje, przekształcenia</p>
-                        </div>
-                        <div class="service-card">
-                            <h3>Prawo podatkowe</h3>
-                            <p>Optymalizacja podatkowa i reprezentacja przed US</p>
-                        </div>
-                    </div>
-                </div>
-            `
-        },
-        fitness: {
-            url: 'www.fitpro-trener.pl',
-            content: `
-                <div class="modal-page modal-fitness">
-                    <nav class="page-nav">
-                        <div class="page-logo">FIT<span>Pro</span></div>
-                        <div class="page-nav-links">
-                            <span>O mnie</span>
-                            <span>Oferta</span>
-                            <span>Transformacje</span>
-                            <span>Cennik</span>
-                            <span>Kontakt</span>
-                        </div>
-                    </nav>
-                    <div class="page-hero">
-                        <h1>Trenuj z <span>najlepszymi</span></h1>
-                        <p>Personalny trening dopasowany do Twoich celów. Schudnij, zbuduj masę lub popraw kondycję.</p>
-                        <span class="page-btn">Umów darmowy trening</span>
-                    </div>
-                    <div class="page-stats">
-                        <div class="stat-card">
-                            <div class="number">500+</div>
-                            <div class="label">Zadowolonych klientów</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="number">8</div>
-                            <div class="label">Lat doświadczenia</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="number">15k+</div>
-                            <div class="label">Przeprowadzonych treningów</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="number">98%</div>
-                            <div class="label">Skuteczność</div>
-                        </div>
-                    </div>
-                </div>
-            `
-        },
-        restaurant: {
-            url: 'www.lacucina.pl',
-            content: `
-                <div class="modal-page modal-restaurant">
-                    <nav class="page-nav">
-                        <div class="page-logo">La <span>Cucina</span></div>
-                        <div class="page-nav-links">
-                            <span>Menu</span>
-                            <span>O nas</span>
-                            <span>Galeria</span>
-                            <span>Rezerwacja</span>
-                            <span>Kontakt</span>
-                        </div>
-                    </nav>
-                    <div class="page-hero">
-                        <span class="page-small">Ristorante Italiano</span>
-                        <h1>Smak Włoch w sercu miasta</h1>
-                        <p>Autentyczna kuchnia włoska przygotowywana z pasją według tradycyjnych receptur. Świeże składniki, domowy makaron, najlepsze wina.</p>
-                        <span class="page-btn">Rezerwuj stolik</span>
-                    </div>
-                    <div class="page-menu">
-                        <div class="menu-card">
-                            <h3>Antipasti</h3>
-                            <p>Bruschetta, Carpaccio, Burrata</p>
-                        </div>
-                        <div class="menu-card">
-                            <h3>Pasta & Risotto</h3>
-                            <p>Tagliatelle, Ravioli, Risotto ai funghi</p>
-                        </div>
-                        <div class="menu-card">
-                            <h3>Dolci</h3>
-                            <p>Tiramisu, Panna Cotta, Cannoli</p>
-                        </div>
-                    </div>
-                </div>
-            `
+            gl_FragColor = vec4(col, 1.0);
         }
+    `;
+
+    const compile = (type, src) => {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, src);
+        gl.compileShader(s);
+        return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
     };
 
-    // Open modal
-    function openModal(modalId) {
-        const template = modalTemplates[modalId];
-        if (!template) return;
+    const vs = compile(gl.VERTEX_SHADER, vert);
+    const fs = compile(gl.FRAGMENT_SHADER, frag);
+    if (!vs || !fs) return;
 
-        modalUrl.textContent = template.url;
-        modalContent.innerHTML = template.content;
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
+    const prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return;
+    gl.useProgram(prog);
+
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, 'p');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+    const uRes = gl.getUniformLocation(prog, 'uRes');
+    const uTime = gl.getUniformLocation(prog, 'uTime');
+    const uMouse = gl.getUniformLocation(prog, 'uMouse');
+
+    // Tło jest rozmyte z natury, więc renderujemy w obniżonej rozdzielczości
+    const scale = 0.5;
+    const resize = () => {
+        canvas.width = Math.max(1, Math.floor(window.innerWidth * scale));
+        canvas.height = Math.max(1, Math.floor(window.innerHeight * scale));
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.uniform2f(uRes, canvas.width, canvas.height);
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const start = performance.now();
+    let visible = true;
+    document.addEventListener('visibilitychange', () => { visible = !document.hidden; if (visible) requestAnimationFrame(draw); });
+
+    function draw(now) {
+        gl.uniform1f(uTime, reduced ? 12.0 : (now - start) / 1000);
+        gl.uniform2f(uMouse, mouse.x, mouse.y);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        if (!reduced && visible) requestAnimationFrame(draw);
     }
-
-    // Close modal
-    function closeModal() {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
-    }
-
-    // Event listeners for portfolio items
-    portfolioItems.forEach(item => {
-        item.addEventListener('click', () => {
-            const modalId = item.getAttribute('data-modal');
-            openModal(modalId);
-        });
-    });
-
-    // Close modal events
-    modalClose.addEventListener('click', closeModal);
-    modalBackdrop.addEventListener('click', closeModal);
-
-    // Close on Escape key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('active')) {
-            closeModal();
-        }
-    });
-}
-
-/**
- * Cookie Banner
- */
-function initCookieBanner() {
-    const banner = document.getElementById('cookie-banner');
-    const acceptBtn = document.getElementById('cookie-accept');
-    const rejectBtn = document.getElementById('cookie-reject');
-
-    if (!banner) return;
-
-    // Check if user already made a choice
-    const cookieConsent = localStorage.getItem('cookieConsent');
-
-    if (!cookieConsent) {
-        // Show banner after a short delay
-        setTimeout(() => {
-            banner.classList.add('active');
-        }, 1500);
-    }
-
-    // Accept cookies
-    acceptBtn.addEventListener('click', () => {
-        localStorage.setItem('cookieConsent', 'accepted');
-        banner.classList.remove('active');
-        // Here you can initialize analytics, etc.
-    });
-
-    // Reject cookies
-    rejectBtn.addEventListener('click', () => {
-        localStorage.setItem('cookieConsent', 'rejected');
-        banner.classList.remove('active');
-    });
-}
+    requestAnimationFrame((now) => { draw(now); canvas.classList.add('is-on'); });
+})();
