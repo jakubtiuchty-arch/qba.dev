@@ -64,7 +64,8 @@
             const y = 1 - (i / (N - 1)) * 2;
             const r = Math.sqrt(1 - y * y);
             const th = golden * i;
-            pts.push({ x: Math.cos(th) * r, y, z: Math.sin(th) * r, px: 0, py: 0, vx: 0, vy: 0, init: false });
+            // j: indywidualna czułość na szarpnięcie, żeby kropki rozsypywały się, a nie przesuwały jak jedna bryła
+            pts.push({ x: Math.cos(th) * r, y, z: Math.sin(th) * r, px: 0, py: 0, vx: 0, vy: 0, init: false, j: 0.5 + Math.random() });
         }
 
         // Kolory od tyłu (jasny liliowy) do przodu (głęboki fiolet)
@@ -113,11 +114,94 @@
             }
         });
 
+        // Ruch telefonu: pochylenie obraca sferę, szarpnięcie rozrzuca kropki
+        const motion = { yaw: 0, pitch: 0, tyaw: 0, tpitch: 0, base: null, kickX: 0, kickY: 0 };
+        const hint = document.getElementById('motionHint');
+        const clamp = (v, a) => Math.max(-a, Math.min(a, v));
+
+        // wektor z układu urządzenia (x w prawo, y w górę telefonu) do układu ekranu przy obróconym telefonie
+        const toScreen = (x, y) => {
+            const a = ((screen.orientation && screen.orientation.angle) ?? window.orientation ?? 0) % 360;
+            if (a === 90 || a === -270) return [-y, x];
+            if (a === 270 || a === -90) return [y, -x];
+            if (a === 180 || a === -180) return [-x, -y];
+            return [x, y];
+        };
+
+        const onOrientation = (e) => {
+            if (e.beta == null || e.gamma == null) return;
+            const [gx, gy] = toScreen(e.gamma, e.beta);
+            if (!motion.base) motion.base = { x: gx, y: gy };
+            // „zero” powoli podąża za tym, jak trzymasz telefon: sfera reaguje na ruch, nie na sam kąt trzymania
+            motion.base.x += (gx - motion.base.x) * 0.01;
+            motion.base.y += (gy - motion.base.y) * 0.01;
+            motion.tyaw = clamp((gx - motion.base.x) / 25, 1) * 1.1;
+            motion.tpitch = clamp((gy - motion.base.y) / 25, 1) * 0.7;
+        };
+
+        let lastKick = 0;
+        const onMotion = (e) => {
+            const acc = e.acceleration;
+            if (!acc || acc.x == null) return;
+            const [sx, sy] = toScreen(acc.x, acc.y);
+            const mag = Math.hypot(sx, sy);
+            if (mag < 0.8) return; // drżenie ręki ignorujemy
+            const m = Math.min(mag, 14) / mag;
+            // kropki zostają w tyle za ruchem telefonu, więc lecą w przeciwną stronę (oś y ekranu rośnie w dół)
+            motion.kickX -= sx * m;
+            motion.kickY += sy * m;
+            if (hint && performance.now() - lastKick > 400 && mag > 2.5) hint.classList.add('is-done');
+            lastKick = performance.now();
+        };
+
+        const startMotion = () => {
+            window.addEventListener('deviceorientation', onOrientation);
+            window.addEventListener('devicemotion', onMotion);
+        };
+
+        const coarse = window.matchMedia('(pointer: coarse)').matches;
+        if (!reduced && coarse && 'DeviceOrientationEvent' in window) {
+            const needsPermission = typeof DeviceOrientationEvent.requestPermission === 'function';
+            if (hint) {
+                hint.textContent = needsPermission ? 'dotknij i porusz telefonem' : 'porusz telefonem';
+                hint.hidden = false;
+            }
+            if (needsPermission) {
+                // iOS pyta o zgodę tylko po geście; linki kontaktu działają normalnie
+                const ask = (e) => {
+                    if (e.target.closest('a')) return;
+                    document.removeEventListener('click', ask);
+                    const perms = [DeviceOrientationEvent.requestPermission()];
+                    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+                        perms.push(DeviceMotionEvent.requestPermission());
+                    }
+                    Promise.all(perms).then((r) => {
+                        if (r.every((s) => s === 'granted')) {
+                            startMotion();
+                            if (hint) hint.textContent = 'porusz telefonem';
+                        } else if (hint) {
+                            hint.classList.add('is-done');
+                        }
+                    }).catch(() => hint && hint.classList.add('is-done'));
+                };
+                document.addEventListener('click', ask);
+            } else {
+                startMotion();
+            }
+            // podpowiedź znika sama po kilku sekundach, nawet bez ruchu
+            if (hint) setTimeout(() => hint.classList.add('is-done'), needsPermission ? 12000 : 6000);
+        }
+
         let angle = 0;
         const frame = () => {
             angle += reduced ? 0 : 0.0028;
-            const tilt = 0.38 + (mouse.y - 0.5) * 0.5;
-            const yaw = angle + (mouse.x - 0.5) * 0.8;
+            motion.yaw += (motion.tyaw - motion.yaw) * 0.08;
+            motion.pitch += (motion.tpitch - motion.pitch) * 0.08;
+            const tilt = 0.38 + (mouse.y - 0.5) * 0.5 + motion.pitch;
+            const yaw = angle + (mouse.x - 0.5) * 0.8 + motion.yaw;
+            const kx = motion.kickX * dpr * dotScale * 1.6;
+            const ky = motion.kickY * dpr * dotScale * 1.6;
+            motion.kickX = motion.kickY = 0;
             const cy = Math.cos(yaw), sy = Math.sin(yaw);
             const cx = Math.cos(tilt), sx = Math.sin(tilt);
             const ox = W / 2, oy = H / 2;
@@ -151,6 +235,13 @@
                         q.vx += (dx / d) * f;
                         q.vy += (dy / d) * f;
                     }
+                }
+
+                if (kx || ky) {
+                    // przód sfery reaguje mocniej niż tył, co daje wrażenie głębi
+                    const k = q.j * (0.5 + (z2 + 1) * 0.35);
+                    q.vx += kx * k;
+                    q.vy += ky * k;
                 }
 
                 q.vx += (tx - q.px) * 0.022;

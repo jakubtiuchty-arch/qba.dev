@@ -328,6 +328,35 @@ ul { padding: 0; list-style: none; }
     touch-action: none;
 }
 
+/* podpowiedź „porusz telefonem”: tylko na dotyku, znika po pierwszym ruchu */
+.sphere__hint {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 6px 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    color: var(--ink);
+    background: rgba(242, 241, 247, 0.72);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    pointer-events: none;
+    transition: opacity 0.8s var(--ease);
+    animation: hint 2.4s ease-in-out infinite;
+}
+.sphere__hint[hidden] { display: none; }
+.sphere__hint.is-done { opacity: 0; animation: none; }
+
+@keyframes hint {
+    0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+    20% { transform: translate(-50%, -50%) rotate(-4deg); }
+    40% { transform: translate(-50%, -50%) rotate(4deg); }
+    60% { transform: translate(-50%, -50%) rotate(0deg); }
+}
+
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ---------- narzędzia ---------- */
