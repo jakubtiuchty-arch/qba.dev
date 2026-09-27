@@ -55,8 +55,9 @@
         const ctx = cv.getContext('2d');
         if (!ctx) return;
 
-        const small = window.innerWidth < 700;
-        const N = small ? 900 : 1700;
+        // liczba kropek rośnie z rozmiarem sfery: mała sfera na telefonie nie może wyglądać jak zbita kula
+        const sphereCss = cv.getBoundingClientRect().width / 1.6;
+        const N = Math.round(Math.min(1700, Math.max(420, sphereCss * sphereCss * 0.0085)));
         const pts = [];
         const golden = Math.PI * (3 - Math.sqrt(5));
         for (let i = 0; i < N; i++) {
@@ -76,13 +77,14 @@
         });
         const buckets = Array.from({ length: BINS }, () => []);
 
-        let W = 0, H = 0, dpr = 1, R = 0, rect = null;
+        let W = 0, H = 0, dpr = 1, R = 0, rect = null, dotScale = 1;
         const size = () => {
             dpr = Math.min(window.devicePixelRatio || 1, 2);
             rect = cv.getBoundingClientRect();
             W = cv.width = Math.round(rect.width * dpr);
             H = cv.height = Math.round(rect.height * dpr);
             R = (W / 1.6) * 0.37; // płótno = 160% sfery; z perspektywą obrys ok. 0.44 sfery
+            dotScale = Math.min(1, Math.max(0.6, rect.width / 1.6 / 420));
         };
         size();
         window.addEventListener('resize', size);
@@ -95,6 +97,10 @@
         };
         window.addEventListener('pointermove', (e) => { toLocal(e); p.active = true; }, { passive: true });
         document.addEventListener('pointerleave', () => { p.active = false; });
+        // dotyk: po oderwaniu palca kropki wracają na miejsce
+        const release = (e) => { if (e.pointerType !== 'mouse') { p.active = false; p.x = p.lx = -9999; p.y = p.ly = -9999; } };
+        window.addEventListener('pointerup', release);
+        window.addEventListener('pointercancel', release);
         cv.addEventListener('pointerdown', (e) => {
             toLocal(e);
             // kliknięcie: mocne rozrzucenie wokół punktu
@@ -162,7 +168,7 @@
             ctx.clearRect(0, 0, W, H);
             for (let i = 0; i < BINS; i++) {
                 ctx.fillStyle = colors[i];
-                const s = (0.7 + (i / BINS) * 1.5) * dpr;
+                const s = (0.7 + (i / BINS) * 1.5) * dpr * dotScale;
                 ctx.beginPath();
                 for (const q of buckets[i]) {
                     ctx.moveTo(q.px + s, q.py);

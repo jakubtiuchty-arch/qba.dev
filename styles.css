@@ -14,8 +14,6 @@
     --serif: "Instrument Serif", ui-serif, Georgia, serif;
     --mono: "Geist Mono", ui-monospace, monospace;
     --gutter: clamp(16px, 4vw, 56px);
-    /* jednostka skalująca się do szerokości ORAZ wysokości okna: całość mieści się na jednym ekranie */
-    --u: min(1vw, 1.72vh);
 }
 
 *,
@@ -80,17 +78,27 @@ ul { padding: 0; list-style: none; }
     100% { transform: translate(0, 0); }
 }
 
-/* ---------- układ: jeden ekran ---------- */
+/* ==========================================================
+   MOBILE FIRST: style bazowe są dla telefonu w pionie.
+   Układ dwukolumnowy włącza się od szerokiego ekranu w poziomie (na dole pliku).
+   Zasada dla każdego rozmiaru: cała plansza na jednym ekranie, bez przewijania.
+   ========================================================== */
+
+/* ---------- układ ---------- */
 
 .page {
     position: relative;
     z-index: 2;
     height: 100vh;
     height: 100svh;
-    min-height: 440px;
+    min-height: 340px;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
-    padding: 0 var(--gutter);
+    padding:
+        env(safe-area-inset-top)
+        max(var(--gutter), env(safe-area-inset-right))
+        0
+        max(var(--gutter), env(safe-area-inset-left));
     max-width: 1560px;
     margin: 0 auto;
     overflow-x: clip;
@@ -100,7 +108,7 @@ ul { padding: 0; list-style: none; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: clamp(14px, calc(var(--u) * 1.7), 28px) 0;
+    padding: 14px 0;
     font-size: 14px;
     border-bottom: 1px solid var(--line);
 }
@@ -127,22 +135,21 @@ ul { padding: 0; list-style: none; }
 .top__meta { color: var(--ink-2); }
 #clock { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
 
-/* ---------- hero ---------- */
+/* ---------- hero: sfera zajmuje wolne miejsce, tekst pod nią ---------- */
 
 .hero {
     display: grid;
-    grid-template-columns: minmax(0, 8fr) minmax(0, 5fr);
-    align-items: center;
-    gap: calc(var(--u) * 3);
+    grid-template-rows: minmax(0, 1fr) auto;
     min-height: 0;
+    padding-bottom: 2.4svh;
 }
 
 .hero__copy { container-type: inline-size; }
 
-/* rozmiar zależy od ekranu, ale najdłuższa linia (ok. 9,3 em) nigdy nie wychodzi poza kolumnę */
 .title {
     font-weight: 500;
-    font-size: min(calc(var(--u) * 6.6), 10.4cqi);
+    /* najdłuższa linia ma ok. 9,3 em, więc 10,4 % szerokości kolumny zawsze się mieści */
+    font-size: min(10.4cqi, 5.2svh);
     line-height: 0.95;
     letter-spacing: -0.045em;
 }
@@ -179,46 +186,49 @@ ul { padding: 0; list-style: none; }
 }
 
 .lead {
+    display: none;
     max-width: 38em;
-    margin-top: calc(var(--u) * 2.2);
-    font-size: max(14px, calc(var(--u) * 1.2));
+    margin-top: 1.8svh;
+    font-size: 15px;
     line-height: 1.5;
     color: var(--ink-2);
     text-wrap: pretty;
 }
 
-/* ---------- kontakt ---------- */
+/* wyższe telefony mają miejsce na opis */
+@media (min-height: 700px) {
+    .lead { display: block; }
+}
+
+/* ---------- kontakt: na telefonie dwa wiersze pod kciuk ---------- */
 
 .contact {
-    margin-top: calc(var(--u) * 2.8);
-    display: flex;
-    align-items: flex-end;
-    flex-wrap: wrap;
-    gap: 16px clamp(28px, calc(var(--u) * 4), 64px);
-    /* telefon i mail w tym samym rozmiarze; rozmiar ograniczony szerokością kolumny, żeby para zmieściła się w jednym rzędzie */
-    --cta: max(24px, min(calc(var(--u) * 3), 5.2cqi));
+    margin-top: 2.4svh;
+    display: grid;
+    border-top: 1px solid var(--line);
+    --cta: 20px;
 }
 
 .cta {
-    display: inline-grid;
-    grid-template-columns: auto auto;
-    column-gap: calc(var(--cta) * 0.4);
+    display: grid;
+    grid-template-columns: 1fr auto auto;
     align-items: center;
-    will-change: transform;
+    column-gap: 14px;
+    min-height: max(52px, 7svh);
+    border-bottom: 1px solid var(--line);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .cta__label {
-    grid-column: 1 / -1;
     font-size: 14px;
     color: var(--muted);
-    margin-bottom: 8px;
 }
 
 .cta__value {
     position: relative;
     font-size: var(--cta);
     font-weight: 500;
-    letter-spacing: -0.035em;
+    letter-spacing: -0.03em;
     line-height: 1.1;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
@@ -237,8 +247,8 @@ ul { padding: 0; list-style: none; }
 }
 
 .cta__arrow {
-    width: calc(var(--cta) * 1.15);
-    height: calc(var(--cta) * 1.15);
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     background: var(--ink);
     color: #fff;
@@ -252,22 +262,31 @@ ul { padding: 0; list-style: none; }
 /* mail: ta sama budowa, strzałka tylko obrysem, bo telefon jest pierwszym wyborem */
 .cta--mail .cta__arrow { background: transparent; color: var(--ink); border-color: rgba(18, 18, 23, 0.25); }
 
-.cta:hover .cta__value::after,
+.cta:active .cta__arrow { background: var(--violet); border-color: var(--violet); color: #fff; transform: scale(0.94); }
+.cta:focus-visible { outline: 2px solid var(--violet); outline-offset: 6px; }
 .cta:focus-visible .cta__value::after { transform: scaleX(1); }
-.cta:hover .cta__arrow { background: var(--violet); border-color: var(--violet); color: #fff; transform: scale(1.06); }
-.cta:hover .cta__arrow svg { transform: rotate(45deg); }
-.cta:focus-visible { outline: 2px solid var(--violet); outline-offset: 8px; }
+
+/* efekty najechania tylko tam, gdzie jest kursor */
+@media (hover: hover) {
+    .cta:hover .cta__value::after { transform: scaleX(1); }
+    .cta:hover .cta__arrow { background: var(--violet); border-color: var(--violet); color: #fff; transform: scale(1.06); }
+    .cta:hover .cta__arrow svg { transform: rotate(45deg); }
+    .logo:hover svg { transform: rotate(-12deg) scale(1.1); }
+}
 
 /* ---------- sfera z cząsteczek ---------- */
 
 .hero__visual {
+    order: -1;
     display: grid;
     place-items: center;
     min-height: 0;
+    /* sfera dopasowuje się do miejsca, które zostało nad tekstem */
+    container-type: size;
 }
 
 .sphere {
-    --s: calc(var(--u) * 30);
+    --s: min(62cqw, 76cqh);
     position: relative;
     width: var(--s);
     aspect-ratio: 1;
@@ -293,20 +312,20 @@ ul { padding: 0; list-style: none; }
 }
 .sphere__ring text {
     font-family: var(--mono);
-    font-size: 12.5px;
+    font-size: 14px;
     letter-spacing: 0.32em;
     fill: var(--ink-2);
     opacity: 0.75;
 }
 
-/* płótno większe od sfery, żeby rozproszone punkty nie były ucinane */
+/* płótno większe od sfery, żeby rozproszone punkty nie były ucinane; palcem też można je rozpraszać */
 .sphere__dots {
     position: absolute;
     inset: -30%;
     width: 160%;
     height: 160%;
     cursor: crosshair;
-    touch-action: pan-y;
+    touch-action: none;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -315,76 +334,71 @@ ul { padding: 0; list-style: none; }
 
 .tools {
     display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    gap: 0 clamp(24px, 4vw, 72px);
-    padding: clamp(14px, calc(var(--u) * 1.8), 30px) 0;
+    gap: 12px;
+    padding: 14px 0 max(14px, env(safe-area-inset-bottom));
     border-top: 1px solid var(--line);
     align-items: start;
 }
 
 .tools__head {
-    font-size: 14px;
-    font-weight: 500;
-}
-.tools__note {
-    margin-top: 2px;
     font-size: 13px;
-    color: var(--muted);
+    font-weight: 500;
+    color: var(--ink-2);
 }
-.tools__note--short { display: none; }
+.tools__note { display: none; }
 
 .logos {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px 28px;
-    margin-top: clamp(10px, calc(var(--u) * 1.1), 18px);
+    gap: 8px 20px;
+    margin-top: 8px;
 }
 
 .logo {
     display: inline-flex;
     align-items: center;
-    gap: 9px;
-    font-size: 16px;
+    gap: 8px;
+    font-size: 15px;
     font-weight: 500;
     letter-spacing: -0.02em;
 }
 .logo svg {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     fill: var(--ink);
     transition: transform 0.6s var(--ease);
 }
-.logo:hover svg { transform: rotate(-12deg) scale(1.1); }
 .logo--claude svg { fill: #D97757; }
 .logo--gemini svg { fill: url(#gemGrad); }
 
 .studio {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px clamp(20px, 3vw, 48px);
-    margin-top: clamp(10px, calc(var(--u) * 1.1), 18px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin-top: 8px;
 }
 
 .studio__item {
     display: grid;
-    grid-template-columns: 22px 1fr;
-    gap: 12px;
+    grid-template-columns: 20px auto;
+    gap: 8px;
     align-items: start;
 }
 
 .studio__logo {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     fill: var(--ink);
 }
 
 .studio__item h3 {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 500;
     letter-spacing: -0.02em;
-    line-height: 22px;
+    line-height: 20px;
 }
 .studio__item p {
+    display: none;
     margin-top: 2px;
     font-size: 13px;
     line-height: 1.4;
@@ -405,44 +419,86 @@ ul { padding: 0; list-style: none; }
 
 .is-ready .reveal { opacity: 1; transform: none; }
 
-/* ---------- tablet i telefon: nadal jeden ekran ---------- */
+/* ---------- od 600 px szerokości: narzędzia w dwóch kolumnach, kontakt obok siebie ---------- */
 
-@media (max-width: 960px) {
-    :root { --m: min(1vw, 0.5vh); }
+@media (min-width: 600px) {
+    .tools { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 0 clamp(24px, 4vw, 72px); padding-top: 18px; }
+    .tools__note { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); }
+    .tools__head { font-size: 14px; color: var(--ink); }
+
+    .contact {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 16px clamp(28px, 5cqi, 64px);
+        border-top: 0;
+        --cta: min(34px, 5.2cqi, 3.6svh);
+    }
+    .cta {
+        display: inline-grid;
+        grid-template-columns: auto auto;
+        column-gap: calc(var(--cta) * 0.4);
+        min-height: 0;
+        border-bottom: 0;
+    }
+    .cta__label { grid-column: 1 / -1; margin-bottom: 8px; }
+    .cta__arrow { width: max(40px, calc(var(--cta) * 1.15)); height: max(40px, calc(var(--cta) * 1.15)); }
+}
+
+/* ---------- szeroki ekran w poziomie: układ dwukolumnowy ---------- */
+
+@media (orientation: landscape) and (min-width: 600px) {
+    :root {
+        /* jednostka skalująca się do szerokości ORAZ wysokości okna: całość mieści się na jednym ekranie */
+        --u: min(1vw, 1.72vh);
+    }
+
+    .top { padding: clamp(14px, calc(var(--u) * 1.7), 28px) 0; }
 
     .hero {
-        grid-template-columns: 1fr;
-        grid-template-rows: minmax(0, 1fr) auto;
-        align-items: end;
-        gap: 0;
-        padding-bottom: calc(var(--m) * 5);
+        grid-template-columns: minmax(0, 8fr) minmax(0, 5fr);
+        grid-template-rows: none;
+        align-items: center;
+        gap: calc(var(--u) * 3);
+        padding-bottom: 0;
     }
-    .hero__visual { order: -1; align-self: stretch; }
-    .sphere { --s: min(62vw, 30vh); }
-    .sphere__ring text { font-size: 14px; }
+    .hero__visual { order: 1; align-self: stretch; }
+    .sphere { --s: min(calc(var(--u) * 30), 90cqw, 80cqh); }
+    .sphere__ring text { font-size: 12.5px; }
 
-    .title { font-size: min(10.4cqi, 5.4vh); }
-    .lead { font-size: min(15px, 2vh); margin-top: 1.8vh; }
-    .contact { margin-top: 2.4vh; gap: 12px 28px; }
-    .contact { --cta: min(24px, 3vh, 5.7cqi); gap: 10px 22px; }
-    .cta__label { margin-bottom: 4px; }
+    .title { font-size: min(calc(var(--u) * 6.6), 10.4cqi); }
+    .lead { display: block; margin-top: calc(var(--u) * 2.2); font-size: max(14px, calc(var(--u) * 1.2)); }
 
-    .tools { grid-template-columns: 1fr 1fr; gap: 16px; }
-    .tools__note { display: none; }
-    .tools__note--short { display: block; }
-    .studio__item p { display: none; }
-    .studio { grid-template-columns: auto auto; justify-content: start; gap: 10px 24px; }
-    .logos { gap: 10px 20px; }
-}
+    .contact { margin-top: calc(var(--u) * 2.8); --cta: max(24px, min(calc(var(--u) * 3), 5.2cqi)); }
 
-@media (max-width: 560px) {
-    .tools { grid-template-columns: 1fr; gap: 12px; }
+    .tools { padding: clamp(14px, calc(var(--u) * 1.8), 30px) 0 max(clamp(14px, calc(var(--u) * 1.8), 30px), env(safe-area-inset-bottom)); }
+    .logos, .studio { margin-top: clamp(10px, calc(var(--u) * 1.1), 18px); }
+    .logos { gap: 10px 28px; }
+    .logo, .studio__item h3 { font-size: 16px; }
+    .logo svg, .studio__logo { width: 22px; height: 22px; }
+    .studio { display: grid; grid-template-columns: 1fr 1fr; gap: 10px clamp(20px, 3vw, 48px); }
+    .studio__item { grid-template-columns: 22px 1fr; gap: 12px; }
+    .studio__item h3 { line-height: 22px; }
+    .studio__item p { display: block; }
+    /* opisy są przy logotypach, więc krótka notka byłaby powtórzeniem */
     .tools__note--short { display: none; }
-    .logo, .studio__item h3 { font-size: 15px; }
 }
 
-@media (max-width: 960px) and (max-height: 640px) {
-    .lead { display: none; }
+/* telefon w poziomie i niskie okna: zostaje to, co najważniejsze */
+@media (orientation: landscape) and (min-width: 600px) and (max-height: 480px) {
+    .lead, .tools__note, .studio__item p { display: none; }
+    .top { padding: 10px 0; }
+    .contact { --cta: 20px; gap: 12px 20px; margin-top: 14px; }
+    .cta__label { margin-bottom: 4px; }
+    .cta__arrow { width: 36px; height: 36px; }
+    .tools { padding: 10px 0 max(10px, env(safe-area-inset-bottom)); }
+    .logos, .studio { margin-top: 6px; }
+    .logo, .studio__item h3 { font-size: 14px; }
+    .logo svg, .studio__logo { width: 18px; height: 18px; }
+    .logos { gap: 6px 16px; }
+    .studio { display: flex; gap: 6px 20px; }
+    .studio__item { grid-template-columns: 18px auto; gap: 8px; }
+    .studio__item h3 { line-height: 18px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
